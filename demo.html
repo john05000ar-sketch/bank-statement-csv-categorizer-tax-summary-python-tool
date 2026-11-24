@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>StatementVault: Bank CSV Categorizer & Tax Summary Tool</title>
+  <style>
+    :root {
+      --bg-base: #0F172A;
+      --bg-surface: #1E293B;
+      --bg-card: #1E293B;
+      --bg-hover: #334155;
+      --border-color: #334155;
+      --border-light: #475569;
+      --text-primary: #F8FAFC;
+      --text-secondary: #94A3B8;
+      --text-muted: #64748B;
+      --royal-blue: #2563EB;
+      --blue-hover: #1D4ED8;
+      --sky-blue: #38BDF8;
+      --emerald-green: #10B981;
+      --emerald-bg: rgba(16, 185, 129, 0.12);
+      --amber-alert: #F59E0B;
+      --amber-bg: rgba(245, 158, 11, 0.12);
+      --rose-danger: #F43F5E;
+      --rose-bg: rgba(244, 63, 94, 0.12);
+      --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    body {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      font-family: var(--font-family);
+      line-height: 1.5;
+      -webkit-font-smoothing: antialiased;
+      padding-bottom: 60px;
+    }
+
+    /* Header Nav */
+    header {
+      background-color: rgba(15, 23, 42, 0.95);
+      backdrop-filter: blur(8px);
+      border-bottom: 1px solid var(--border-color);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      padding: 16px 24px;
+    }
+
+    .nav-container {
+      max-width: 1400px;
+      margin: 0 auto;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-group {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .brand-icon {
+      width: 40px;
+      height: 40px;
+      background: linear-gradient(135deg, var(--royal-blue), var(--sky-blue));
+      border-radius: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: #FFFFFF;
+      font-weight: 800;
+      font-size: 20px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.35);
+    }
+
+    .brand-title {
+      font-size: 1.25rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+    }
+
+    .brand-subtitle {
+      font-size: 0.8rem;
+      color: var(--sky-blue);
+      font-weight: 500;
+    }
+
+    .badges-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      padding: 6px 12px;
+      border-radius: 9999px;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      border: 1px solid transparent;
+    }
+
+    .badge-offline {
+      background-color: var(--emerald-bg);
+      color: var(--emerald-green);
+      border-color: rgba(16, 185, 129, 0.3);
+    }
+
+    .badge-private {
+      background-color: rgba(56, 189, 248, 0.12);
+      color: var(--sky-blue);
+      border-color: rgba(56, 189, 248, 0.3);
+    }
+
+    .actions-group {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 8px 16px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      border: none;
+      text-decoration: none;
+    }
+
+    .btn-primary {
+      background-color: var(--royal-blue);
+      color: #FFFFFF;
+    }
+
+    .btn-primary:hover {
+      background-color: var(--blue-hover);
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.4);
+    }
+
+    .btn-secondary {
+      background-color: var(--bg-surface);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+    }
+
+    .btn-secondary:hover {
+      background-color: var(--bg-hover);
+      border-color: var(--border-light);
+    }
+
+    .btn-success {
+      background-color: var(--emerald-green);
+      color: #FFFFFF;
+    }
+
+    .btn-success:hover {
+      background-color: #059669;
+    }
+
+    /* Main Container */
+    main {
+      max-width: 1400px;
+      margin: 24px auto;
+      padding: 0 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 28px;
+    }
+
+    /* 3-Step Walkthrough Banner */
+    .walkthrough-card {
+      background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(15, 23, 42, 0.95));
+      border: 1px solid rgba(56, 189, 248, 0.2);
+      border-radius: 16px;
+      padding: 24px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+    }
+
+    .walkthrough-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .walkthrough-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: var(--sky-blue);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    .steps-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 20px;
+    }
+
+    .step-item {
+      background-color: rgba(15, 23, 42, 0.6);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 20px;
+      display: flex;
+      gap: 16px;
+      align-items: flex-start;
+      position: relative;
+    }
+
+    .step-number {
+      width: 36px;
+      height: 36px;
+      border-radius: 50%;
+      background: var(--royal-blue);
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-weight: 800;
+      font-size: 1rem;
+      flex-shrink: 0;
+      box-shadow: 0 2px 8px rgba(37, 99, 235, 0.4);
+    }
+
+    .step-content h4 {
+      font-size: 1rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 6px;
+    }
+
+    .step-content p {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* KPI Grid */
+    .kpi-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+    }
+
+    .kpi-card {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 14px;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      transition: transform 0.2s ease, border-color 0.2s ease;
+    }
+
+    .kpi-card:hover {
+      transform: translateY(-2px);
+      border-color: var(--royal-blue);
+    }
+
+    .kpi-label {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--text-secondary);
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      margin-bottom: 8px;
+    }
+
+    .kpi-value {
+      font-size: 1.75rem;
+      font-weight: 800;
+      color: #FFFFFF;
+      letter-spacing: -0.02em;
+    }
+
+    .kpi-value.green {
+      color: var(--emerald-green);
+    }
+
+    .kpi-value.blue {
+      color: var(--sky-blue);
+    }
+
+    .kpi-value.amber {
+      color: var(--amber-alert);
+    }
+
+    .kpi-subtext {
+      font-size: 0.75rem;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Analytics Charts Section */
+    .charts-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 20px;
+    }
+
+    @media (max-width: 992px) {
+      .charts-grid {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    .panel {
+      background-color: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      padding: 24px;
+      display: flex;
+      flex-direction: column;
+      gap: 18px;
+    }
+
+    .panel-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 12px;
+      border-bottom: 1px solid var(--border-color);
+      padding-bottom: 14px;
+    }
+
+    .panel-title {
+      font-size: 1.15rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .panel-subtitle {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* SVG Charts */
+    .chart-box {
+      width: 100%;
+      height: 280px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+    }
+
+    svg text {
+      font-family: var(--font-family);
+    }
+
+    /* Drag & Drop Import Zone */
+    .drop-zone {
+      border: 2px dashed var(--royal-blue);
+      border-radius: 14px;
+      padding: 32px 20px;
+      text-align: center;
+      background-color: rgba(37, 99, 235, 0.04);
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+
+    .drop-zone:hover, .drop-zone.dragover {
+      background-color: rgba(37, 99, 235, 0.08);
+      border-color: var(--sky-blue);
+      transform: scale(1.005);
+    }
+
+    .drop-icon {
+      font-size: 32px;
+      color: var(--sky-blue);
+      margin-bottom: 8px;
+    }
+
+    .drop-title {
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #FFFFFF;
+      margin-bottom: 4px;
+    }
+
+    .drop-desc {
+      font-size: 0.85rem;
+      color: var(--text-secondary);
+    }
+
+    /* Tables */
+    .table-container {
+      overflow-x: auto;
+      border-radius: 12px;
+      border: 1px solid var(--border-color);
+      max-height: 520px;
+      position: relative;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      font-size: 0.85rem;
+    }
+
+    thead {
+      background-color: #0F172A;
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+
+    th {
+      padding: 12px 14px;
+      font-weight: 700;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border-color);
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 14px;
+      border-bottom: 1px solid var(--border-color);
+      color: var(--text-primary);
+    }
+
+    tbody tr:hover {
+      background-color: rgba(255, 255, 255, 0.03);
+    }
+
+    .amt-positive {
+      color: var(--emerald-green);
+      font-weight: 700;
+    }
+
+    .amt-negative {
+      color: #FFFFFF;
+      font-weight: 600;
+    }
+
+    .tag-recurring {
+      background-color: var(--amber-bg);
+      color: var(--amber-alert);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+
+    .tag-personal {
+      background-color: var(--rose-bg);
+      color: var(--rose-danger);
+      padding: 3px 8px;
+      border-radius: 6px;
+      font-size: 0.72rem;
+      font-weight: 700;
+      border: 1px solid rgba(244, 63, 94, 0.3);
+    }
+
+    /* Select Inputs */
+    select.category-select {
+      background-color: var(--bg-base);
+      color: var(--text-primary);
+      border: 1px solid var(--border-color);
+      border-radius: 6px;
+      padding: 4px 8px;
+      font-size: 0.8rem;
+      cursor: pointer;
+      width: 100%;
+      max-width: 240px;
+    }
+
+    select.category-select:focus {
+      outline: none;
+      border-color: var(--sky-blue);
+    }
+
+    /* Filters Bar */
+    .filters-bar {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+      align-items: center;
+      margin-bottom: 14px;
+    }
+
+    .search-input {
+      background-color: var(--bg-base);
+      border: 1px solid var(--border-color);
+      color: #FFFFFF;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-size: 0.85rem;
+      min-width: 260px;
+    }
+
+    .search-input:focus {
+      outline: none;
+      border-color: var(--royal-blue);
+    }
+
+    /* Print Styles for Accountant-Ready Handover */
+    @media print {
+      body {
+        background-color: #FFFFFF !important;
+        color: #000000 !important;
+        padding: 0;
+      }
+      header, .walkthrough-card, .drop-zone, .actions-group, .filters-bar, #sub-audit-panel, .btn {
+        display: none !important;
+      }
+      .panel, .kpi-card {
+        background-color: #FFFFFF !important;
+        border: 1px solid #CCCCCC !important;
+        color: #000000 !important;
+        box-shadow: none !important;
+        break-inside: avoid;
+      }
+      .kpi-value, .brand-title, th, td {
+        color: #000000 !important;
+      }
+      .table-container {
+        max-height: none !important;
+        overflow: visible !important;
+      }
+    }
+  </style>
+</head>
+<body>
+
+  <!-- Top Header Navigation -->
+  <header>
+    <div class="nav-container">
+      <div class="brand-group">
+        <div class="brand-icon">SV</div>
+        <div>
+          <div class="brand-title">StatementVault</div>
+          <div class="brand-subtitle">Bank CSV Categorizer & Tax Summary Tool</div>
+        </div>
+      </div>
+
+      <div class="badges-group">
+        <span class="badge badge-offline">● 100% Offline (Zero internet needed)</span>
+        <span class="badge badge-private">● 100% Private (Saved on your device)</span>
+      </div>
+
+      <div class="actions-group">
+        <button class="btn btn-secondary" onclick="window.print()">Print Tax Report (PDF)</button>
+        <button class="btn btn-secondary" onclick="exportCategorizedCSV()">Export Categorized CSV</button>
+        <button class="btn btn-primary" onclick="exportScheduleCCSV()">Export Tax Summary CSV</button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Container -->
+  <main>
+
+    <!-- Didactic 3-Step Walkthrough Banner -->
+    <section class="walkthrough-card">
+      <div class="walkthrough-header">
+        <div class="walkthrough-title">HOW IT WORKS IN 3 SIMPLE STEPS</div>
+        <span class="badge badge-private">60-Second Setup Guarantee</span>
+      </div>
+      <div class="steps-grid">
+        <div class="step-item">
+          <div class="step-number">1</div>
+          <div class="step-content">
+            <h4>Drop or Open Your Bank CSV</h4>
+            <p>Drag and drop your raw CSV file from Chase, Bank of America, Wells Fargo, or PayPal below. Works instantly offline with zero setup.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">2</div>
+          <div class="step-content">
+            <h4>Automated Categorization & Audit</h4>
+            <p>Automated formulas instantly sort messy transactions into IRS Schedule C lines and audit recurring monthly software subscriptions.</p>
+          </div>
+        </div>
+        <div class="step-item">
+          <div class="step-number">3</div>
+          <div class="step-content">
+            <h4>Instant Tax Summary & Export</h4>
+            <p>Review your accountant-ready tax rollup, estimated quarterly vouchers, and export clean Excel-ready CSV files in one click.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Top KPI Metric Cards -->
+    <section class="kpi-grid">
+      <div class="kpi-card">
+        <div class="kpi-label">Gross Business Revenue</div>
+        <div class="kpi-value green" id="kpi-gross">$28,250.00</div>
+        <div class="kpi-subtext">Schedule C Line 1 (Client Deposits)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Total Deductible Expenses</div>
+        <div class="kpi-value" id="kpi-expenses">-$7,268.40</div>
+        <div class="kpi-subtext">Schedule C Line 28 (Eligible Write-offs)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Net Business Profit</div>
+        <div class="kpi-value green" id="kpi-profit">$20,981.60</div>
+        <div class="kpi-subtext">Schedule C Line 31 (Taxable Earnings)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Self-Employment Tax (15.3%)</div>
+        <div class="kpi-value blue" id="kpi-se-tax">$2,964.61</div>
+        <div class="kpi-subtext">Schedule SE (Social Security + Medicare)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Estimated Quarterly Payment</div>
+        <div class="kpi-value blue" id="kpi-quarterly">$1,472.38</div>
+        <div class="kpi-subtext">Form 1040-ES Voucher (Q1 - Q4)</div>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-label">Annual Recurring Software</div>
+        <div class="kpi-value amber" id="kpi-subscriptions">$10,200.48/yr</div>
+        <div class="kpi-subtext">16 Active Recurring Subscriptions</div>
+      </div>
+    </section>
+
+    <!-- Visual Charts Grid (Pure SVG) -->
+    <section class="charts-grid">
+      <!-- Donut Chart: Expense Breakdown -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Schedule C Expense Distribution</div>
+            <div class="panel-subtitle">Visual percentage breakdown by tax deduction category</div>
+          </div>
+        </div>
+        <div class="chart-box" id="donut-chart-container">
+          <!-- Injected via SVG JS -->
+        </div>
+      </div>
+
+      <!-- Cash Flow Bar Chart -->
+      <div class="panel">
+        <div class="panel-header">
+          <div>
+            <div class="panel-title">Monthly Cash Flow Comparison</div>
+            <div class="panel-subtitle">Gross Revenue vs Deductible Business Outflows</div>
+          </div>
+        </div>
+        <div class="chart-box" id="bar-chart-container">
+          <!-- Injected via SVG JS -->
+        </div>
+      </div>
+    </section>
+
+    <!-- Schedule C Rollup Summary Table -->
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">IRS Schedule C Deductions Rollup</div>
+          <div class="panel-subtitle">Official line-by-line tax breakdown ready for your Form 1040 Schedule C</div>
+        </div>
+        <button class="btn btn-secondary" onclick="exportScheduleCCSV()">Download Summary CSV</button>
+      </div>
+      <div class="table-container">
+        <table id="schedule-c-table">
+          <thead>
+            <tr>
+              <th>Schedule C Line</th>
+              <th>Category Description</th>
+              <th style="text-align: right;">Total Amount</th>
+              <th style="text-align: center;">Deduction %</th>
+              <th style="text-align: right;">Eligible Write-off ($USD)</th>
+              <th>Tax Notes</th>
+            </tr>
+          </thead>
+          <tbody id="schedule-c-tbody">
+            <!-- Dynamic rows injected here -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Recurring Subscriptions & Money Leak Auditor -->
+    <section class="panel" id="sub-audit-panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Recurring Subscription & Money Leak Detector</div>
+          <div class="panel-subtitle">Identifies monthly charges, SaaS commitments, and personal entertainment leaks</div>
+        </div>
+        <span class="badge badge-offline">Audit Protection Active</span>
+      </div>
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Service / Merchant</th>
+              <th>Category</th>
+              <th>Schedule C Line</th>
+              <th>Frequency</th>
+              <th style="text-align: right;">Average Monthly Charge</th>
+              <th style="text-align: right;">Projected Annual Spend</th>
+              <th>Action Recommendation</th>
+            </tr>
+          </thead>
+          <tbody id="subscriptions-tbody">
+            <!-- Injected dynamically -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Drag & Drop Import File Area -->
+    <section class="drop-zone" id="drop-zone">
+      <div class="drop-icon">📂</div>
+      <div class="drop-title">Drop Any Bank or PayPal CSV Here to Categorize</div>
+      <div class="drop-desc">Supports Chase, Bank of America, Wells Fargo, PayPal, and standard bank statement exports. 100% Private on your device.</div>
+      <input type="file" id="file-input" accept=".csv" style="display: none;">
+      <div style="margin-top: 14px;">
+        <button class="btn btn-primary" onclick="document.getElementById('file-input').click()">Select CSV File</button>
+        <button class="btn btn-secondary" onclick="resetToSampleData()" style="margin-left: 8px;">Reset to Included Sample Data</button>
+      </div>
+    </section>
+
+    <!-- Interactive Transaction Ledger -->
+    <section class="panel">
+      <div class="panel-header">
+        <div>
+          <div class="panel-title">Interactive Transaction Ledger</div>
+          <div class="panel-subtitle">Re-categorize any row with instant real-time recalculation of all tax metrics</div>
+        </div>
+        <div style="font-size: 0.85rem; color: var(--text-secondary);" id="tx-count-display">
+          Showing 76 transactions
+        </div>
+      </div>
+
+      <!-- Filters Bar -->
+      <div class="filters-bar">
+        <input type="text" class="search-input" id="search-input" placeholder="Search merchant, description, or amount..." oninput="filterTransactions()">
+        
+        <select class="category-select" id="filter-category" onchange="filterTransactions()" style="max-width: 220px;">
+          <option value="ALL">All Categories & Lines</option>
+        </select>
+
+        <select class="category-select" id="filter-type" onchange="filterTransactions()" style="max-width: 180px;">
+          <option value="ALL">All Transaction Types</option>
+          <option value="INCOME">Income / Deposits Only</option>
+          <option value="EXPENSE">Business Expenses Only</option>
+          <option value="RECURRING">Recurring Subscriptions Only</option>
+          <option value="PERSONAL">Personal / Transfers Only</option>
+        </select>
+      </div>
+
+      <!-- Ledger Table -->
+      <div class="table-container">
+        <table>
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th>Account</th>
+              <th>Merchant</th>
+              <th>Description</th>
+              <th style="text-align: right;">Gross ($USD)</th>
+              <th>Schedule C Line (Editable)</th>
+              <th style="text-align: center;">Deductible %</th>
+              <th style="text-align: right;">Write-off ($USD)</th>
+              <th style="text-align: center;">Recurring?</th>
+            </tr>
+          </thead>
+          <tbody id="transactions-tbody">
+            <!-- Dynamic rows -->
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+  </main>
+
+  <script>
+    // Embedded Data from Python Engine
+    const INITIAL_TRANSACTIONS = [{"id": 1, "date": "10/02/2026", "source": "sample_chase_statement.csv", "merchant": "Amazon Web Services (AWS)", "description": "AMAZON WEB SERVICES AWS.AMAZON.CO WA", "amount": -184.5, "schedule_c_line": "Line 18: Office expense", "category": "Cloud Hosting & Infrastructure", "deductible_percent": 1.0, "deductible_amount": -184.5, "is_recurring": true, "business_purpose": "Cloud servers, database hosting, and secure infrastructure for client digital applications"}, {"id": 2, "date": "10/03/2026", "source": "sample_chase_statement.csv", "merchant": "GitHub", "description": "GITHUB INC 877-448-4820 CA", "amount": -21.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -21.0, "is_recurring": true, "business_purpose": "Code repository hosting, automated Actions CI/CD workflows, and security scanning"}, {"id": 3, "date": "10/04/2026", "source": "sample_chase_statement.csv", "merchant": "Google Workspace", "description": "GOOGLE *WORKSPACE CC@GOOGLE.COM CA", "amount": -36.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -36.0, "is_recurring": true, "business_purpose": "Professional domain business email, Google Meet, Drive cloud storage, and Docs"}, {"id": 4, "date": "10/05/2026", "source": "sample_chase_statement.csv", "merchant": "Figma", "description": "FIGMA INC. SAN FRANCISCO CA", "amount": -45.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -45.0, "is_recurring": true, "business_purpose": "UI/UX wireframing, high-fidelity web prototyping, and digital design asset creation"}, {"id": 5, "date": "10/06/2026", "source": "sample_chase_statement.csv", "merchant": "Client Revenue / Customer Payment", "description": "STRIPE PAYOUT ACME CORP RETAINER", "amount": 6500.0, "schedule_c_line": "Gross Income: Sales & Services", "category": "Business Inflow / Revenue", "deductible_percent": 0.0, "deductible_amount": 6500.0, "is_recurring": false, "business_purpose": "Gross revenue earned from client consulting retainers, software builds, or product sales"}, {"id": 6, "date": "10/07/2026", "source": "sample_chase_statement.csv", "merchant": "Notion Labs", "description": "NOTION LABS INC SAN FRANCISCO CA", "amount": -20.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -20.0, "is_recurring": true, "business_purpose": "Central business documentation, client knowledge bases, project management, and CRM"}, {"id": 7, "date": "10/08/2026", "source": "sample_chase_statement.csv", "merchant": "Zoom Video Communications", "description": "ZOOM.US 888-799-9666 SAN JOSE CA", "amount": -15.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -15.99, "is_recurring": true, "business_purpose": "Video conference calls with clients, remote prospect demonstrations, and webinars"}, {"id": 8, "date": "10/09/2026", "source": "sample_chase_statement.csv", "merchant": "Adobe Creative Cloud", "description": "ADOBE *CREATIVE CLOUD 800-833-6687 CA", "amount": -54.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -54.99, "is_recurring": true, "business_purpose": "Photoshop, Illustrator, Premiere Pro, and Acrobat Pro for client visual deliverables"}, {"id": 9, "date": "10/12/2026", "source": "sample_chase_statement.csv", "merchant": "Upwork Global Escrow", "description": "UPWORK ESCROW CONTRACT DEV WORK", "amount": -650.0, "schedule_c_line": "Line 11: Contract labor", "category": "Contract Labor & Subcontractors", "deductible_percent": 1.0, "deductible_amount": -650.0, "is_recurring": false, "business_purpose": "Subcontracted freelance developers and UI designers hired for client milestones"}, {"id": 10, "date": "10/14/2026", "source": "sample_chase_statement.csv", "merchant": "Coffee & Client Meeting", "description": "STARBUCKS STORE #10492 SEATTLE WA", "amount": -14.75, "schedule_c_line": "Line 24b: Deductible meals (50%)", "category": "Meals & Client Dining", "deductible_percent": 0.5, "deductible_amount": -7.38, "is_recurring": false, "business_purpose": "One-on-one business discussion and project scope review with prospective client (50% deductible)"}, {"id": 11, "date": "10/16/2026", "source": "sample_chase_statement.csv", "merchant": "GOOGLE *ADS948215982 GOOGLE.COM CA", "description": "GOOGLE *ADS948215982 GOOGLE.COM CA", "amount": -350.0, "schedule_c_line": "Uncategorized Expense", "category": "Uncategorized Expense", "deductible_percent": 1.0, "deductible_amount": -350.0, "is_recurring": false, "business_purpose": "Requires merchant verification for business purpose deduction"}, {"id": 12, "date": "10/18/2026", "source": "sample_chase_statement.csv", "merchant": "Verizon Wireless", "description": "VERIZON WIRELESS BILL PAYMENT", "amount": -125.0, "schedule_c_line": "Line 25: Utilities", "category": "Utilities & Telecommunications", "deductible_percent": 1.0, "deductible_amount": -125.0, "is_recurring": true, "business_purpose": "Dedicated business smartphone line, 5G mobile hotspot for client travel, and SMS alerts"}, {"id": 13, "date": "10/20/2026", "source": "sample_chase_statement.csv", "merchant": "Comcast Xfinity Business", "description": "COMCAST XFINITY BUSINESS INTERNET", "amount": -99.95, "schedule_c_line": "Line 25: Utilities", "category": "Utilities & Telecommunications", "deductible_percent": 1.0, "deductible_amount": -99.95, "is_recurring": true, "business_purpose": "Dedicated high-speed commercial fiber internet connection with static IP address"}, {"id": 14, "date": "10/22/2026", "source": "sample_chase_statement.csv", "merchant": "Staples Business Supplies", "description": "STAPLES #0382 DESK AND TONER", "amount": -89.4, "schedule_c_line": "Line 18: Office expense", "category": "Office Supplies & Equipment", "deductible_percent": 1.0, "deductible_amount": -89.4, "is_recurring": false, "business_purpose": "Printer paper, toner cartridges, desk organizers, and physical office shipping supplies"}, {"id": 15, "date": "10/24/2026", "source": "sample_chase_statement.csv", "merchant": "Personal Entertainment / Non-Deductible", "description": "SPOTIFY USA MONTHLY SUBSCRIPTION", "amount": -11.99, "schedule_c_line": "Non-Deductible: Personal / Transfer", "category": "Personal Living Expense", "deductible_percent": 0.0, "deductible_amount": -0.0, "is_recurring": true, "business_purpose": "Personal entertainment service (Non-deductible personal expense segregated from business)"}, {"id": 16, "date": "10/25/2026", "source": "sample_chase_statement.csv", "merchant": "Owner Draw / Non-Business Transfer", "description": "ONLINE TRANSFER TO SAVINGS - OWNER DRAW", "amount": -2000.0, "schedule_c_line": "Non-Deductible: Personal / Transfer", "category": "Equity & Internal Transfers", "deductible_percent": 0.0, "deductible_amount": -0.0, "is_recurring": false, "business_purpose": "Sole proprietor profit withdrawal or balance transfer between business accounts (Not deductible)"}, {"id": 17, "date": "10/28/2026", "source": "sample_chase_statement.csv", "merchant": "Business Rideshare (Uber / Lyft)", "description": "UBER *TRIP RIDESHARE TO CLIENT", "amount": -34.2, "schedule_c_line": "Line 9: Car and truck expenses", "category": "Travel & Transportation", "deductible_percent": 1.0, "deductible_amount": -34.2, "is_recurring": false, "business_purpose": "Ground transit to client on-site meeting and airport travel for business trip"}, {"id": 18, "date": "10/30/2026", "source": "sample_chase_statement.csv", "merchant": "Bank Service Fee", "description": "MONTHLY SERVICE FEE CHECKING", "amount": -15.0, "schedule_c_line": "Line 10: Commissions and fees", "category": "Merchant & Payment Processing Fees", "deductible_percent": 1.0, "deductible_amount": -15.0, "is_recurring": true, "business_purpose": "Commercial business checking account monthly maintenance service fee"}, {"id": 19, "date": "11/02/2026", "source": "sample_chase_statement.csv", "merchant": "Client Revenue / Customer Payment", "description": "DIRECT DEPOSIT CLIENT APEX CONSULTING", "amount": 4200.0, "schedule_c_line": "Gross Income: Sales & Services", "category": "Business Inflow / Revenue", "deductible_percent": 0.0, "deductible_amount": 4200.0, "is_recurring": false, "business_purpose": "Gross revenue earned from client consulting retainers, software builds, or product sales"}, {"id": 20, "date": "11/02/2026", "source": "sample_chase_statement.csv", "merchant": "Amazon Web Services (AWS)", "description": "AMAZON WEB SERVICES AWS.AMAZON.CO WA", "amount": -192.1, "schedule_c_line": "Line 18: Office expense", "category": "Cloud Hosting & Infrastructure", "deductible_percent": 1.0, "deductible_amount": -192.1, "is_recurring": true, "business_purpose": "Cloud servers, database hosting, and secure infrastructure for client digital applications"}, {"id": 21, "date": "11/03/2026", "source": "sample_chase_statement.csv", "merchant": "GitHub", "description": "GITHUB INC 877-448-4820 CA", "amount": -21.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -21.0, "is_recurring": true, "business_purpose": "Code repository hosting, automated Actions CI/CD workflows, and security scanning"}, {"id": 22, "date": "11/04/2026", "source": "sample_chase_statement.csv", "merchant": "Google Workspace", "description": "GOOGLE *WORKSPACE CC@GOOGLE.COM CA", "amount": -36.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -36.0, "is_recurring": true, "business_purpose": "Professional domain business email, Google Meet, Drive cloud storage, and Docs"}, {"id": 23, "date": "11/05/2026", "source": "sample_chase_statement.csv", "merchant": "Figma", "description": "FIGMA INC. SAN FRANCISCO CA", "amount": -45.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -45.0, "is_recurring": true, "business_purpose": "UI/UX wireframing, high-fidelity web prototyping, and digital design asset creation"}, {"id": 24, "date": "11/06/2026", "source": "sample_chase_statement.csv", "merchant": "Notion Labs", "description": "NOTION LABS INC SAN FRANCISCO CA", "amount": -20.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -20.0, "is_recurring": true, "business_purpose": "Central business documentation, client knowledge bases, project management, and CRM"}, {"id": 25, "date": "11/08/2026", "source": "sample_chase_statement.csv", "merchant": "Zoom Video Communications", "description": "ZOOM.US 888-799-9666 SAN JOSE CA", "amount": -15.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -15.99, "is_recurring": true, "business_purpose": "Video conference calls with clients, remote prospect demonstrations, and webinars"}, {"id": 26, "date": "11/09/2026", "source": "sample_chase_statement.csv", "merchant": "Adobe Creative Cloud", "description": "ADOBE *CREATIVE CLOUD 800-833-6687 CA", "amount": -54.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -54.99, "is_recurring": true, "business_purpose": "Photoshop, Illustrator, Premiere Pro, and Acrobat Pro for client visual deliverables"}, {"id": 27, "date": "11/11/2026", "source": "sample_chase_statement.csv", "merchant": "Commercial Airline Flight", "description": "DELTA AIR LINES 0062391054321 ATLANTA GA", "amount": -485.6, "schedule_c_line": "Line 24a: Travel", "category": "Travel & Transportation", "deductible_percent": 1.0, "deductible_amount": -485.6, "is_recurring": false, "business_purpose": "Roundtrip business airfare to attend industry annual developer summit and client kickoff"}, {"id": 28, "date": "11/13/2026", "source": "sample_chase_statement.csv", "merchant": "Business Hotel Lodging", "description": "MARRIOTT DOWNTOWN LODGING CONF", "amount": -382.4, "schedule_c_line": "Line 24a: Travel", "category": "Travel & Transportation", "deductible_percent": 1.0, "deductible_amount": -382.4, "is_recurring": false, "business_purpose": "Overnight hotel lodging during out-of-town client technical integration sprint"}, {"id": 29, "date": "11/14/2026", "source": "sample_chase_statement.csv", "merchant": "Business Lunch / Fast Casual", "description": "SWEETGREEN #102 CLIENT WORKING LUNCH", "amount": -32.5, "schedule_c_line": "Line 24b: Deductible meals (50%)", "category": "Meals & Client Dining", "deductible_percent": 0.5, "deductible_amount": -16.25, "is_recurring": false, "business_purpose": "Working business lunch during client on-site working session (50% deductible)"}, {"id": 30, "date": "11/15/2026", "source": "sample_chase_statement.csv", "merchant": "Business Rideshare (Uber / Lyft)", "description": "UBER *TRIP AIRPORT GROUND TRANSIT", "amount": -42.8, "schedule_c_line": "Line 9: Car and truck expenses", "category": "Travel & Transportation", "deductible_percent": 1.0, "deductible_amount": -42.8, "is_recurring": false, "business_purpose": "Ground transit to client on-site meeting and airport travel for business trip"}, {"id": 31, "date": "11/17/2026", "source": "sample_chase_statement.csv", "merchant": "Meta Ads (Facebook / Instagram)", "description": "FACEBOOK ADS META PLATFORMS MENLO PARK", "amount": -275.0, "schedule_c_line": "Line 8: Advertising", "category": "Advertising & Marketing", "deductible_percent": 1.0, "deductible_amount": -275.0, "is_recurring": false, "business_purpose": "Paid targeted ad campaigns for customer acquisition and product sales conversions"}, {"id": 32, "date": "11/18/2026", "source": "sample_chase_statement.csv", "merchant": "Verizon Wireless", "description": "VERIZON WIRELESS BILL PAYMENT", "amount": -125.0, "schedule_c_line": "Line 25: Utilities", "category": "Utilities & Telecommunications", "deductible_percent": 1.0, "deductible_amount": -125.0, "is_recurring": true, "business_purpose": "Dedicated business smartphone line, 5G mobile hotspot for client travel, and SMS alerts"}, {"id": 33, "date": "11/20/2026", "source": "sample_chase_statement.csv", "merchant": "Comcast Xfinity Business", "description": "COMCAST XFINITY BUSINESS INTERNET", "amount": -99.95, "schedule_c_line": "Line 25: Utilities", "category": "Utilities & Telecommunications", "deductible_percent": 1.0, "deductible_amount": -99.95, "is_recurring": true, "business_purpose": "Dedicated high-speed commercial fiber internet connection with static IP address"}, {"id": 34, "date": "11/22/2026", "source": "sample_chase_statement.csv", "merchant": "Personal Entertainment / Non-Deductible", "description": "NETFLIX.COM ENTERTAINMENT", "amount": -17.99, "schedule_c_line": "Non-Deductible: Personal / Transfer", "category": "Personal Living Expense", "deductible_percent": 0.0, "deductible_amount": -0.0, "is_recurring": true, "business_purpose": "Personal entertainment service (Non-deductible personal expense segregated from business)"}, {"id": 35, "date": "11/25/2026", "source": "sample_chase_statement.csv", "merchant": "Owner Draw / Non-Business Transfer", "description": "ONLINE TRANSFER TO PERSONAL ACCOUNT", "amount": -2500.0, "schedule_c_line": "Non-Deductible: Personal / Transfer", "category": "Equity & Internal Transfers", "deductible_percent": 0.0, "deductible_amount": -0.0, "is_recurring": false, "business_purpose": "Sole proprietor profit withdrawal or balance transfer between business accounts (Not deductible)"}, {"id": 36, "date": "11/28/2026", "source": "sample_chase_statement.csv", "merchant": "Best Buy Electronics", "description": "BEST BUY #0912 4K USB-C MONITOR", "amount": -329.99, "schedule_c_line": "Line 18: Office expense", "category": "Office Supplies & Equipment", "deductible_percent": 1.0, "deductible_amount": -329.99, "is_recurring": false, "business_purpose": "External 4K monitor, backup solid state drive (SSD), and noise-canceling headset"}, {"id": 37, "date": "11/30/2026", "source": "sample_chase_statement.csv", "merchant": "Bank Service Fee", "description": "MONTHLY SERVICE FEE CHECKING", "amount": -15.0, "schedule_c_line": "Line 10: Commissions and fees", "category": "Merchant & Payment Processing Fees", "deductible_percent": 1.0, "deductible_amount": -15.0, "is_recurring": true, "business_purpose": "Commercial business checking account monthly maintenance service fee"}, {"id": 38, "date": "12/01/2026", "source": "sample_chase_statement.csv", "merchant": "Client Revenue / Customer Payment", "description": "STRIPE PAYOUT DIGITAL ASSET SALES", "amount": 5800.0, "schedule_c_line": "Gross Income: Sales & Services", "category": "Business Inflow / Revenue", "deductible_percent": 0.0, "deductible_amount": 5800.0, "is_recurring": false, "business_purpose": "Gross revenue earned from client consulting retainers, software builds, or product sales"}, {"id": 39, "date": "12/02/2026", "source": "sample_chase_statement.csv", "merchant": "Amazon Web Services (AWS)", "description": "AMAZON WEB SERVICES AWS.AMAZON.CO WA", "amount": -205.8, "schedule_c_line": "Line 18: Office expense", "category": "Cloud Hosting & Infrastructure", "deductible_percent": 1.0, "deductible_amount": -205.8, "is_recurring": true, "business_purpose": "Cloud servers, database hosting, and secure infrastructure for client digital applications"}, {"id": 40, "date": "12/03/2026", "source": "sample_chase_statement.csv", "merchant": "GitHub", "description": "GITHUB INC 877-448-4820 CA", "amount": -21.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -21.0, "is_recurring": true, "business_purpose": "Code repository hosting, automated Actions CI/CD workflows, and security scanning"}, {"id": 41, "date": "12/04/2026", "source": "sample_chase_statement.csv", "merchant": "Google Workspace", "description": "GOOGLE *WORKSPACE CC@GOOGLE.COM CA", "amount": -36.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -36.0, "is_recurring": true, "business_purpose": "Professional domain business email, Google Meet, Drive cloud storage, and Docs"}, {"id": 42, "date": "12/05/2026", "source": "sample_chase_statement.csv", "merchant": "Figma", "description": "FIGMA INC. SAN FRANCISCO CA", "amount": -45.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -45.0, "is_recurring": true, "business_purpose": "UI/UX wireframing, high-fidelity web prototyping, and digital design asset creation"}, {"id": 43, "date": "12/07/2026", "source": "sample_chase_statement.csv", "merchant": "Notion Labs", "description": "NOTION LABS INC SAN FRANCISCO CA", "amount": -20.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -20.0, "is_recurring": true, "business_purpose": "Central business documentation, client knowledge bases, project management, and CRM"}, {"id": 44, "date": "12/08/2026", "source": "sample_chase_statement.csv", "merchant": "Zoom Video Communications", "description": "ZOOM.US 888-799-9666 SAN JOSE CA", "amount": -15.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -15.99, "is_recurring": true, "business_purpose": "Video conference calls with clients, remote prospect demonstrations, and webinars"}, {"id": 45, "date": "12/09/2026", "source": "sample_chase_statement.csv", "merchant": "Adobe Creative Cloud", "description": "ADOBE *CREATIVE CLOUD 800-833-6687 CA", "amount": -54.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -54.99, "is_recurring": true, "business_purpose": "Photoshop, Illustrator, Premiere Pro, and Acrobat Pro for client visual deliverables"}, {"id": 46, "date": "12/10/2026", "source": "sample_chase_statement.csv", "merchant": "Certified Public Accountant (CPA) / Tax Services", "description": "CERTIFIED CPA TAX PREP YEAR-END PLANNING", "amount": -750.0, "schedule_c_line": "Line 17: Legal and professional services", "category": "Legal & Professional Services", "deductible_percent": 1.0, "deductible_amount": -750.0, "is_recurring": false, "business_purpose": "Annual business tax return preparation, Schedule C filings, and quarterly tax planning"}, {"id": 47, "date": "12/12/2026", "source": "sample_chase_statement.csv", "merchant": "Fiverr International", "description": "FIVERR INTL VIDEO EDITING PROMO", "amount": -185.0, "schedule_c_line": "Line 11: Contract labor", "category": "Contract Labor & Subcontractors", "deductible_percent": 1.0, "deductible_amount": -185.0, "is_recurring": false, "business_purpose": "Contract voiceover artists, video editors, and technical documentation writers"}, {"id": 48, "date": "12/15/2026", "source": "sample_chase_statement.csv", "merchant": "Apple Hardware / App Store", "description": "APPLE STORE DOCKING ACCESSORIES", "amount": -79.0, "schedule_c_line": "Line 18: Office expense", "category": "Office Supplies & Equipment", "deductible_percent": 1.0, "deductible_amount": -79.0, "is_recurring": false, "business_purpose": "MacBook Pro M-Series development workstation and professional developer tools"}, {"id": 49, "date": "12/18/2026", "source": "sample_chase_statement.csv", "merchant": "Verizon Wireless", "description": "VERIZON WIRELESS BILL PAYMENT", "amount": -125.0, "schedule_c_line": "Line 25: Utilities", "category": "Utilities & Telecommunications", "deductible_percent": 1.0, "deductible_amount": -125.0, "is_recurring": true, "business_purpose": "Dedicated business smartphone line, 5G mobile hotspot for client travel, and SMS alerts"}, {"id": 50, "date": "12/20/2026", "source": "sample_chase_statement.csv", "merchant": "Comcast Xfinity Business", "description": "COMCAST XFINITY BUSINESS INTERNET", "amount": -99.95, "schedule_c_line": "Line 25: Utilities", "category": "Utilities & Telecommunications", "deductible_percent": 1.0, "deductible_amount": -99.95, "is_recurring": true, "business_purpose": "Dedicated high-speed commercial fiber internet connection with static IP address"}, {"id": 51, "date": "12/22/2026", "source": "sample_chase_statement.csv", "merchant": "Business Lunch / Fast Casual", "description": "PANERA BREAD #204 PROSPECT STRATEGY", "amount": -26.4, "schedule_c_line": "Line 24b: Deductible meals (50%)", "category": "Meals & Client Dining", "deductible_percent": 0.5, "deductible_amount": -13.2, "is_recurring": false, "business_purpose": "Working business lunch during client on-site working session (50% deductible)"}, {"id": 52, "date": "12/26/2026", "source": "sample_chase_statement.csv", "merchant": "Personal Groceries / Non-Deductible", "description": "WHOLE FOODS MARKET GROCERIES", "amount": -84.6, "schedule_c_line": "Non-Deductible: Personal / Transfer", "category": "Personal Living Expense", "deductible_percent": 0.0, "deductible_amount": -0.0, "is_recurring": false, "business_purpose": "Personal home food and household grocery supplies (Non-deductible personal expense)"}, {"id": 53, "date": "12/28/2026", "source": "sample_chase_statement.csv", "merchant": "Owner Draw / Non-Business Transfer", "description": "ONLINE TRANSFER TO SAVINGS - OWNER DRAW", "amount": -3000.0, "schedule_c_line": "Non-Deductible: Personal / Transfer", "category": "Equity & Internal Transfers", "deductible_percent": 0.0, "deductible_amount": -0.0, "is_recurring": false, "business_purpose": "Sole proprietor profit withdrawal or balance transfer between business accounts (Not deductible)"}, {"id": 54, "date": "12/31/2026", "source": "sample_chase_statement.csv", "merchant": "Bank Service Fee", "description": "MONTHLY SERVICE FEE CHECKING", "amount": -15.0, "schedule_c_line": "Line 10: Commissions and fees", "category": "Merchant & Payment Processing Fees", "deductible_percent": 1.0, "deductible_amount": -15.0, "is_recurring": true, "business_purpose": "Commercial business checking account monthly maintenance service fee"}, {"id": 55, "date": "10/05/2026", "source": "sample_paypal_statement.csv", "merchant": "Nordic Digital Ltd - Website UI Design & Architecture SOW #104", "description": "Nordic Digital Ltd - Website UI Design & Architecture SOW #104", "amount": 1250.0, "schedule_c_line": "Gross Income: Sales & Services", "category": "Business Revenue", "deductible_percent": 0.0, "deductible_amount": 0.0, "is_recurring": false, "business_purpose": "Client service revenue, digital product sales, or consulting deposit"}, {"id": 56, "date": "10/05/2026", "source": "sample_paypal_statement.csv", "merchant": "PayPal Merchant Fees", "description": "PayPal Fee for: Nordic Digital Ltd - Website UI Design & Architecture SOW #104", "amount": -44.12, "schedule_c_line": "Line 10: Commissions and fees", "category": "Merchant & Payment Processing Fees", "deductible_percent": 1.0, "deductible_amount": -44.12, "is_recurring": false, "business_purpose": "Merchant payment gateway commission fees deducted from online client payments"}, {"id": 57, "date": "10/08/2026", "source": "sample_paypal_statement.csv", "merchant": "Canva Pro", "description": "Canva Pty Ltd - Canva Pro Monthly Subscription", "amount": -12.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -12.99, "is_recurring": true, "business_purpose": "Social media graphics, promotional banners, sales proposals, and marketing collateral"}, {"id": 58, "date": "10/12/2026", "source": "sample_paypal_statement.csv", "merchant": "Typeform Surveys", "description": "Typeform SL - Typeform Plus Monthly Plan", "amount": -29.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -29.0, "is_recurring": true, "business_purpose": "Interactive client intake questionnaires and customer feedback NPS surveys"}, {"id": 59, "date": "10/15/2026", "source": "sample_paypal_statement.csv", "merchant": "Horizon Labs LLC - Full-Stack React Dashboard Development Sprint", "description": "Horizon Labs LLC - Full-Stack React Dashboard Development Sprint", "amount": 2800.0, "schedule_c_line": "Gross Income: Sales & Services", "category": "Business Revenue", "deductible_percent": 0.0, "deductible_amount": 0.0, "is_recurring": false, "business_purpose": "Client service revenue, digital product sales, or consulting deposit"}, {"id": 60, "date": "10/15/2026", "source": "sample_paypal_statement.csv", "merchant": "PayPal Merchant Fees", "description": "PayPal Fee for: Horizon Labs LLC - Full-Stack React Dashboard Development Sprint", "amount": -98.21, "schedule_c_line": "Line 10: Commissions and fees", "category": "Merchant & Payment Processing Fees", "deductible_percent": 1.0, "deductible_amount": -98.21, "is_recurring": false, "business_purpose": "Merchant payment gateway commission fees deducted from online client payments"}, {"id": 61, "date": "10/18/2026", "source": "sample_paypal_statement.csv", "merchant": "Envato Elements", "description": "Envato Pty Ltd - Envato Elements Commercial Asset License", "amount": -33.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & Digital Assets", "deductible_percent": 1.0, "deductible_amount": -33.0, "is_recurring": true, "business_purpose": "Commercial stock footage, audio tracks, icon libraries, and website code templates"}, {"id": 62, "date": "10/22/2026", "source": "sample_paypal_statement.csv", "merchant": "Elena Rostova - Contract 3D Icon Pack Rendering Deliverables", "description": "Elena Rostova - Contract 3D Icon Pack Rendering Deliverables", "amount": -450.0, "schedule_c_line": "Uncategorized Expense", "category": "Uncategorized Expense", "deductible_percent": 1.0, "deductible_amount": -450.0, "is_recurring": false, "business_purpose": "Requires merchant verification for business purpose deduction"}, {"id": 63, "date": "11/04/2026", "source": "sample_paypal_statement.csv", "merchant": "Canva Pro", "description": "Canva Pty Ltd - Canva Pro Monthly Subscription", "amount": -12.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -12.99, "is_recurring": true, "business_purpose": "Social media graphics, promotional banners, sales proposals, and marketing collateral"}, {"id": 64, "date": "11/09/2026", "source": "sample_paypal_statement.csv", "merchant": "Vanguard Ventures - Brand Identity & Marketing Landing Page", "description": "Vanguard Ventures - Brand Identity & Marketing Landing Page", "amount": 3500.0, "schedule_c_line": "Gross Income: Sales & Services", "category": "Business Revenue", "deductible_percent": 0.0, "deductible_amount": 0.0, "is_recurring": false, "business_purpose": "Client service revenue, digital product sales, or consulting deposit"}, {"id": 65, "date": "11/09/2026", "source": "sample_paypal_statement.csv", "merchant": "PayPal Merchant Fees", "description": "PayPal Fee for: Vanguard Ventures - Brand Identity & Marketing Landing Page", "amount": -122.64, "schedule_c_line": "Line 10: Commissions and fees", "category": "Merchant & Payment Processing Fees", "deductible_percent": 1.0, "deductible_amount": -122.64, "is_recurring": false, "business_purpose": "Merchant payment gateway commission fees deducted from online client payments"}, {"id": 66, "date": "11/12/2026", "source": "sample_paypal_statement.csv", "merchant": "Typeform Surveys", "description": "Typeform SL - Typeform Plus Monthly Plan", "amount": -29.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -29.0, "is_recurring": true, "business_purpose": "Interactive client intake questionnaires and customer feedback NPS surveys"}, {"id": 67, "date": "11/18/2026", "source": "sample_paypal_statement.csv", "merchant": "Envato Elements", "description": "Envato Pty Ltd - Envato Elements Commercial Asset License", "amount": -33.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & Digital Assets", "deductible_percent": 1.0, "deductible_amount": -33.0, "is_recurring": true, "business_purpose": "Commercial stock footage, audio tracks, icon libraries, and website code templates"}, {"id": 68, "date": "11/20/2026", "source": "sample_paypal_statement.csv", "merchant": "Zapier", "description": "Zapier Inc - Zapier Professional Automation Plan", "amount": -29.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -29.99, "is_recurring": true, "business_purpose": "Automated multi-app business workflows, lead routing, and accounting syncing"}, {"id": 69, "date": "11/24/2026", "source": "sample_paypal_statement.csv", "merchant": "Lucas Vance - Technical Documentation & API Endpoint Testing", "description": "Lucas Vance - Technical Documentation & API Endpoint Testing", "amount": -550.0, "schedule_c_line": "Uncategorized Expense", "category": "Uncategorized Expense", "deductible_percent": 1.0, "deductible_amount": -550.0, "is_recurring": false, "business_purpose": "Requires merchant verification for business purpose deduction"}, {"id": 70, "date": "12/04/2026", "source": "sample_paypal_statement.csv", "merchant": "Canva Pro", "description": "Canva Pty Ltd - Canva Pro Monthly Subscription", "amount": -12.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -12.99, "is_recurring": true, "business_purpose": "Social media graphics, promotional banners, sales proposals, and marketing collateral"}, {"id": 71, "date": "12/07/2026", "source": "sample_paypal_statement.csv", "merchant": "Summit Media Partners - Monthly Growth Marketing & Conversion Optimization", "description": "Summit Media Partners - Monthly Growth Marketing & Conversion Optimization", "amount": 4200.0, "schedule_c_line": "Gross Income: Sales & Services", "category": "Business Revenue", "deductible_percent": 0.0, "deductible_amount": 0.0, "is_recurring": false, "business_purpose": "Client service revenue, digital product sales, or consulting deposit"}, {"id": 72, "date": "12/07/2026", "source": "sample_paypal_statement.csv", "merchant": "PayPal Merchant Fees", "description": "PayPal Fee for: Summit Media Partners - Monthly Growth Marketing & Conversion Optimization", "amount": -147.07, "schedule_c_line": "Line 10: Commissions and fees", "category": "Merchant & Payment Processing Fees", "deductible_percent": 1.0, "deductible_amount": -147.07, "is_recurring": false, "business_purpose": "Merchant payment gateway commission fees deducted from online client payments"}, {"id": 73, "date": "12/12/2026", "source": "sample_paypal_statement.csv", "merchant": "Typeform Surveys", "description": "Typeform SL - Typeform Plus Monthly Plan", "amount": -29.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -29.0, "is_recurring": true, "business_purpose": "Interactive client intake questionnaires and customer feedback NPS surveys"}, {"id": 74, "date": "12/18/2026", "source": "sample_paypal_statement.csv", "merchant": "Envato Elements", "description": "Envato Pty Ltd - Envato Elements Commercial Asset License", "amount": -33.0, "schedule_c_line": "Line 18: Office expense", "category": "Software & Digital Assets", "deductible_percent": 1.0, "deductible_amount": -33.0, "is_recurring": true, "business_purpose": "Commercial stock footage, audio tracks, icon libraries, and website code templates"}, {"id": 75, "date": "12/20/2026", "source": "sample_paypal_statement.csv", "merchant": "Zapier", "description": "Zapier Inc - Zapier Professional Automation Plan", "amount": -29.99, "schedule_c_line": "Line 18: Office expense", "category": "Software & SaaS Subscriptions", "deductible_percent": 1.0, "deductible_amount": -29.99, "is_recurring": true, "business_purpose": "Automated multi-app business workflows, lead routing, and accounting syncing"}, {"id": 76, "date": "12/22/2026", "source": "sample_paypal_statement.csv", "merchant": "Owner Draw / Non-Business Transfer", "description": "Transfer to Bank Account - Transfer to Business Checking", "amount": -10000.0, "schedule_c_line": "Non-Deductible: Personal / Transfer", "category": "Equity & Internal Transfers", "deductible_percent": 0.0, "deductible_amount": -0.0, "is_recurring": false, "business_purpose": "Sole proprietor profit withdrawal or balance transfer between business accounts (Not deductible)"}];
+    const RULES_CONFIG = [{"pattern": "(?i)(amazon web services|aws\\.amazon|aws cloud)", "merchant_name": "Amazon Web Services (AWS)", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Cloud servers, database hosting, and secure infrastructure for client digital applications", "confidence": "High"}, {"pattern": "(?i)(google cloud|gcp_billing|google\\*cloud)", "merchant_name": "Google Cloud Platform", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Container hosting, machine learning APIs, and cloud storage for business deliverables", "confidence": "High"}, {"pattern": "(?i)(digitalocean|digital ocean)", "merchant_name": "DigitalOcean", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Virtual private servers (droplets) and managed databases hosting production client sites", "confidence": "High"}, {"pattern": "(?i)(vercel|vercel inc)", "merchant_name": "Vercel", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Edge serverless deployment platform and web performance optimization for commercial software", "confidence": "High"}, {"pattern": "(?i)(netlify)", "merchant_name": "Netlify", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Static site hosting, automated CI/CD builds, and web application hosting", "confidence": "High"}, {"pattern": "(?i)(cloudflare)", "merchant_name": "Cloudflare", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "DDoS protection, DNS management, and CDN caching for commercial web properties", "confidence": "High"}, {"pattern": "(?i)(heroku)", "merchant_name": "Heroku", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Cloud platform PaaS compute dynos and managed Redis/PostgreSQL instances", "confidence": "High"}, {"pattern": "(?i)(supabase)", "merchant_name": "Supabase", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Managed open-source PostgreSQL database, authentication, and edge functions", "confidence": "High"}, {"pattern": "(?i)(mongodb|mongo atlas)", "merchant_name": "MongoDB Atlas", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Dedicated cloud database cluster for multi-tenant software applications", "confidence": "High"}, {"pattern": "(?i)(github|github, inc\\.)", "merchant_name": "GitHub", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Code repository hosting, automated Actions CI/CD workflows, and security scanning", "confidence": "High"}, {"pattern": "(?i)(gitlab)", "merchant_name": "GitLab", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Version control repository management, project tracking, and DevOps runner pipeline", "confidence": "High"}, {"pattern": "(?i)(openai|chatgpt|openai opc)", "merchant_name": "OpenAI / ChatGPT Plus", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "AI workflow automation, drafting marketing copy, and software code generation", "confidence": "High"}, {"pattern": "(?i)(anthropic|claude\\.ai)", "merchant_name": "Anthropic Claude Pro", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Advanced AI reasoning, complex document analysis, and software development assistance", "confidence": "High"}, {"pattern": "(?i)(midjourney)", "merchant_name": "Midjourney", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Generative imagery generation for client pitch decks, branding, and web design assets", "confidence": "High"}, {"pattern": "(?i)(slack|slack technologies)", "merchant_name": "Slack Technologies", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Team communication, client collaboration channels, and automated webhook notifications", "confidence": "High"}, {"pattern": "(?i)(zoom\\.us|zoom video)", "merchant_name": "Zoom Video Communications", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Video conference calls with clients, remote prospect demonstrations, and webinars", "confidence": "High"}, {"pattern": "(?i)(notion|notion labs)", "merchant_name": "Notion Labs", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Central business documentation, client knowledge bases, project management, and CRM", "confidence": "High"}, {"pattern": "(?i)(figma)", "merchant_name": "Figma", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "UI/UX wireframing, high-fidelity web prototyping, and digital design asset creation", "confidence": "High"}, {"pattern": "(?i)(canva)", "merchant_name": "Canva Pro", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Social media graphics, promotional banners, sales proposals, and marketing collateral", "confidence": "High"}, {"pattern": "(?i)(adobe|creative cloud)", "merchant_name": "Adobe Creative Cloud", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Photoshop, Illustrator, Premiere Pro, and Acrobat Pro for client visual deliverables", "confidence": "High"}, {"pattern": "(?i)(miro|realtimeboard)", "merchant_name": "Miro", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Interactive digital whiteboard for client discovery workshops and architecture diagrams", "confidence": "High"}, {"pattern": "(?i)(asana)", "merchant_name": "Asana", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Client project task tracking, milestone management, and operational workflows", "confidence": "High"}, {"pattern": "(?i)(monday\\.com)", "merchant_name": "Monday.com", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Work OS platform for managing client deliverables, pipelines, and timelines", "confidence": "High"}, {"pattern": "(?i)(clickup)", "merchant_name": "ClickUp", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "All-in-one productivity suite, project boards, and client deliverable tracking", "confidence": "High"}, {"pattern": "(?i)(loom\\.com|loom video)", "merchant_name": "Loom Video", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Asynchronous screen recording and video walkthroughs for client presentations", "confidence": "High"}, {"pattern": "(?i)(calendly)", "merchant_name": "Calendly", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Automated appointment scheduling for prospect discovery calls and client meetings", "confidence": "High"}, {"pattern": "(?i)(zapier)", "merchant_name": "Zapier", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Automated multi-app business workflows, lead routing, and accounting syncing", "confidence": "High"}, {"pattern": "(?i)(make\\.com|integromat)", "merchant_name": "Make.com (Integromat)", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Visual workflow automation connecting payment gateways, webhooks, and databases", "confidence": "High"}, {"pattern": "(?i)(google[\\s\\*]+workspace|google[\\s\\*]+gsuite|google cloud identity)", "merchant_name": "Google Workspace", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Professional domain business email, Google Meet, Drive cloud storage, and Docs", "confidence": "High"}, {"pattern": "(?i)(microsoft\\*365|msft \\*office|msft \\*azure)", "merchant_name": "Microsoft 365", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Commercial Office suite (Excel, Word, Outlook, OneDrive) for client financial modeling", "confidence": "High"}, {"pattern": "(?i)(dropbox)", "merchant_name": "Dropbox Business", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Secure cloud file backup and heavy asset file transfer for clients", "confidence": "High"}, {"pattern": "(?i)(box\\.com)", "merchant_name": "Box Enterprise Cloud", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Encrypted enterprise content management and compliance file archiving", "confidence": "High"}, {"pattern": "(?i)(1password|agilebits)", "merchant_name": "1Password Business", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Secure encrypted password management and shared credential vault for client logins", "confidence": "High"}, {"pattern": "(?i)(lastpass)", "merchant_name": "LastPass Premium", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Business credential vault and multi-factor authentication security enforcement", "confidence": "High"}, {"pattern": "(?i)(backblaze)", "merchant_name": "Backblaze Cloud Backup", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Continuous encrypted off-site workstation backup and disaster recovery archive", "confidence": "High"}, {"pattern": "(?i)(namecheap)", "merchant_name": "Namecheap Domains & SSL", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Domain registration, DNS privacy, and SSL security certificates for commercial brands", "confidence": "High"}, {"pattern": "(?i)(godaddy)", "merchant_name": "GoDaddy", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Business domain registration and web domain portfolio management", "confidence": "High"}, {"pattern": "(?i)(porkbun)", "merchant_name": "Porkbun Domains", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Business domain name registration and DNS routing management", "confidence": "High"}, {"pattern": "(?i)(mailchimp|the rocket science)", "merchant_name": "Mailchimp", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Customer newsletter broadcast, email list segmentation, and automated drip sequences", "confidence": "High"}, {"pattern": "(?i)(convertkit|kit\\.com)", "merchant_name": "ConvertKit (Kit)", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Creator email marketing automation, audience funnel lead capture, and broadcasts", "confidence": "High"}, {"pattern": "(?i)(beehiiv)", "merchant_name": "Beehiiv Newsletter", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Commercial editorial newsletter publishing platform and subscriber growth funnels", "confidence": "High"}, {"pattern": "(?i)(substack)", "merchant_name": "Substack", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Paid editorial newsletter publication and subscriber communication", "confidence": "High"}, {"pattern": "(?i)(hubspot)", "merchant_name": "HubSpot", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Inbound marketing automation, sales deal pipeline CRM, and prospect tracking", "confidence": "High"}, {"pattern": "(?i)(activecampaign)", "merchant_name": "ActiveCampaign", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Omnichannel customer automation, lead scoring, and sales pipeline sequences", "confidence": "High"}, {"pattern": "(?i)(buffer|buffer\\.com)", "merchant_name": "Buffer Social", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Automated social media publishing and business brand engagement analytics", "confidence": "High"}, {"pattern": "(?i)(hootsuite)", "merchant_name": "Hootsuite", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Social media scheduling, commercial listening streams, and audience analytics", "confidence": "High"}, {"pattern": "(?i)(facebook ads|meta platforms|meta ads)", "merchant_name": "Meta Ads (Facebook / Instagram)", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Paid targeted ad campaigns for customer acquisition and product sales conversions", "confidence": "High"}, {"pattern": "(?i)(google\\*ads|google ads|adwords)", "merchant_name": "Google Ads", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Search engine advertising targeting high-intent prospect inquiries and service leads", "confidence": "High"}, {"pattern": "(?i)(linkedin ads)", "merchant_name": "LinkedIn Ads", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "B2B sponsored content campaigns targeting enterprise decision makers and clients", "confidence": "High"}, {"pattern": "(?i)(twitter ads|x\\.com ads)", "merchant_name": "X (Twitter) Ads", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Promoted posts to drive digital software downloads and newsletter subscriptions", "confidence": "High"}, {"pattern": "(?i)(tiktok ads)", "merchant_name": "TikTok Ads", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Short-form video advertising campaigns to drive e-commerce customer acquisition", "confidence": "High"}, {"pattern": "(?i)(direct deposit|payroll deposit|stripe payout|client payment|invoice payout|customer payment|wire deposit|payment received)", "merchant_name": "Client Revenue / Customer Payment", "category": "Business Inflow / Revenue", "schedule_c_line": "Gross Income: Sales & Services", "deductible_percent": 0.0, "is_recurring": false, "business_purpose": "Gross revenue earned from client consulting retainers, software builds, or product sales", "confidence": "High"}, {"pattern": "(?i)(stripe fee|stripe processing|stripe charges?|stripe payments? fee)", "merchant_name": "Stripe Processing Fees", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Credit card processing transaction fees (2.9% + 30c) on client invoice receipts", "confidence": "High"}, {"pattern": "(?i)(paypal \\*fee|paypal fee|paypal partner fee)", "merchant_name": "PayPal Merchant Fees", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Merchant payment gateway commission fees deducted from online client payments", "confidence": "High"}, {"pattern": "(?i)(square inc|squareup|sq \\*)", "merchant_name": "Square Point-of-Sale Fees", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Point-of-sale credit card processing fees and mobile card reader charges", "confidence": "High"}, {"pattern": "(?i)(shopify|shopify payments)", "merchant_name": "Shopify Platform & Fees", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "E-commerce platform monthly store subscription and online payment transaction fees", "confidence": "High"}, {"pattern": "(?i)(gumroad)", "merchant_name": "Gumroad Platform Fees", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Digital marketplace 10% platform sales cut and merchant processing fees", "confidence": "High"}, {"pattern": "(?i)(lemon squeezy|lemonsqueezy)", "merchant_name": "Lemon Squeezy Merchant Fees", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Merchant of Record processing commissions and global VAT handling fees", "confidence": "High"}, {"pattern": "(?i)(paddle\\.com|paddle payments)", "merchant_name": "Paddle Merchant Fees", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Merchant of Record checkout processing commissions and software billing fees", "confidence": "High"}, {"pattern": "(?i)(wise|transferwise)", "merchant_name": "Wise Transfer Fees", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "International wire exchange spread and cross-border contractor payment fees", "confidence": "High"}, {"pattern": "(?i)(monthly service fee|bank service charge|maintenance fee)", "merchant_name": "Bank Service Fee", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Commercial business checking account monthly maintenance service fee", "confidence": "High"}, {"pattern": "(?i)(wire transfer fee|incoming wire fee|outgoing wire)", "merchant_name": "Bank Wire Transfer Fee", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Bank transactional processing fee for sending or receiving client wire settlements", "confidence": "High"}, {"pattern": "(?i)(upwork|upwork escrow)", "merchant_name": "Upwork Global Escrow", "category": "Contract Labor & Subcontractors", "schedule_c_line": "Line 11: Contract labor", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Subcontracted freelance developers and UI designers hired for client milestones", "confidence": "High"}, {"pattern": "(?i)(fiverr|fiverr intl)", "merchant_name": "Fiverr International", "category": "Contract Labor & Subcontractors", "schedule_c_line": "Line 11: Contract labor", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Contract voiceover artists, video editors, and technical documentation writers", "confidence": "High"}, {"pattern": "(?i)(toptal)", "merchant_name": "Toptal Contractor", "category": "Contract Labor & Subcontractors", "schedule_c_line": "Line 11: Contract labor", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Specialized senior software engineering and architecture consulting services", "confidence": "High"}, {"pattern": "(?i)(deel\\.com|deel inc)", "merchant_name": "Deel Contractor Payouts", "category": "Contract Labor & Subcontractors", "schedule_c_line": "Line 11: Contract labor", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "International independent contractor payroll compliance and monthly retainer payouts", "confidence": "High"}, {"pattern": "(?i)(gusto|zenpayroll)", "merchant_name": "Gusto Payroll & HR", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Payroll software processing, 1099-NEC contractor filings, and HR compliance", "confidence": "High"}, {"pattern": "(?i)(quickbooks|intuit \\*qb|intuit \\*quickbooks)", "merchant_name": "Intuit QuickBooks Online", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Double-entry bookkeeping software, general ledger recording, and sales tax reporting", "confidence": "High"}, {"pattern": "(?i)(xero|xero inc)", "merchant_name": "Xero Accounting", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Cloud accounting software for bank feeds, invoicing, and balance sheet reporting", "confidence": "High"}, {"pattern": "(?i)(freshbooks)", "merchant_name": "FreshBooks Invoicing", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Client time tracking, expense tracking, and automated recurring client invoicing", "confidence": "High"}, {"pattern": "(?i)(cpa|accounting services|tax prep|accountant|h&r block|turbotax)", "merchant_name": "Certified Public Accountant (CPA) / Tax Services", "category": "Legal & Professional Services", "schedule_c_line": "Line 17: Legal and professional services", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Annual business tax return preparation, Schedule C filings, and quarterly tax planning", "confidence": "High"}, {"pattern": "(?i)(legalzoom|rocket lawyer|law firm|attorney|law office)", "merchant_name": "Legal Counsel & Entity Filings", "category": "Legal & Professional Services", "schedule_c_line": "Line 17: Legal and professional services", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "LLC annual franchise report filing, client service contract review, and IP protection", "confidence": "High"}, {"pattern": "(?i)(wework|regus|spaces|coworking|industrious)", "merchant_name": "Co-Working Office Space", "category": "Rent & Workspace", "schedule_c_line": "Line 20b: Rent or lease (Vehicles, machinery, equipment)", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Dedicated private desk space and professional conference room for client meetings", "confidence": "High"}, {"pattern": "(?i)(uber \\*trip|uber\\.com|lyft \\*ride|lyft)", "merchant_name": "Business Rideshare (Uber / Lyft)", "category": "Travel & Transportation", "schedule_c_line": "Line 9: Car and truck expenses", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Ground transit to client on-site meeting and airport travel for business trip", "confidence": "High"}, {"pattern": "(?i)(delta air|united air|american air|southwest air|jetblue|alaska air)", "merchant_name": "Commercial Airline Flight", "category": "Travel & Transportation", "schedule_c_line": "Line 24a: Travel", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Roundtrip business airfare to attend industry annual developer summit and client kickoff", "confidence": "High"}, {"pattern": "(?i)(marriott|hilton|hyatt|sheraton|westin|ihg|holiday inn)", "merchant_name": "Business Hotel Lodging", "category": "Travel & Transportation", "schedule_c_line": "Line 24a: Travel", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Overnight hotel lodging during out-of-town client technical integration sprint", "confidence": "High"}, {"pattern": "(?i)(airbnb)", "merchant_name": "Airbnb Lodging", "category": "Travel & Transportation", "schedule_c_line": "Line 24a: Travel", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Furnished apartment rental during multi-day commercial client onsite delivery", "confidence": "High"}, {"pattern": "(?i)(amtrak)", "merchant_name": "Amtrak Rail", "category": "Travel & Transportation", "schedule_c_line": "Line 24a: Travel", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Business rail travel between regional client offices for contract signing", "confidence": "High"}, {"pattern": "(?i)(hertz|enterprise rent|avis|budget rent|national car)", "merchant_name": "Car Rental", "category": "Travel & Transportation", "schedule_c_line": "Line 24a: Travel", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Rental car for business transportation while traveling out of state to client facilities", "confidence": "High"}, {"pattern": "(?i)(starbucks|peet's coffee|blue bottle|dunkin)", "merchant_name": "Coffee & Client Meeting", "category": "Meals & Client Dining", "schedule_c_line": "Line 24b: Deductible meals (50%)", "deductible_percent": 0.5, "is_recurring": false, "business_purpose": "One-on-one business discussion and project scope review with prospective client (50% deductible)", "confidence": "High"}, {"pattern": "(?i)(doordash|uber eats|grubhub|postmates|seamless)", "merchant_name": "Food Delivery Service", "category": "Meals & Client Dining", "schedule_c_line": "Line 24b: Deductible meals (50%)", "deductible_percent": 0.5, "is_recurring": false, "business_purpose": "Working meal provided during late-night emergency production code deployment (50% deductible)", "confidence": "Medium"}, {"pattern": "(?i)(panera|sweetgreen|chipotle|cava|pret a manger)", "merchant_name": "Business Lunch / Fast Casual", "category": "Meals & Client Dining", "schedule_c_line": "Line 24b: Deductible meals (50%)", "deductible_percent": 0.5, "is_recurring": false, "business_purpose": "Working business lunch during client on-site working session (50% deductible)", "confidence": "High"}, {"pattern": "(?i)(restaurant|grill|bistro|cafe|diner|steakhouse|sushi)", "merchant_name": "Client Dinner & Entertainment", "category": "Meals & Client Dining", "schedule_c_line": "Line 24b: Deductible meals (50%)", "deductible_percent": 0.5, "is_recurring": false, "business_purpose": "Dinner with key client stakeholder discussing annual contract extension (50% deductible)", "confidence": "Medium"}, {"pattern": "(?i)(verizon|vzw|verizon wireless)", "merchant_name": "Verizon Wireless", "category": "Utilities & Telecommunications", "schedule_c_line": "Line 25: Utilities", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Dedicated business smartphone line, 5G mobile hotspot for client travel, and SMS alerts", "confidence": "High"}, {"pattern": "(?i)(at&t|att\\*bill|att mobility)", "merchant_name": "AT&T Telecommunications", "category": "Utilities & Telecommunications", "schedule_c_line": "Line 25: Utilities", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Business wireless phone service and mobile data connectivity for remote work", "confidence": "High"}, {"pattern": "(?i)(t-mobile|tmobile)", "merchant_name": "T-Mobile USA", "category": "Utilities & Telecommunications", "schedule_c_line": "Line 25: Utilities", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Business cellular mobile communication and international data roaming for travel", "confidence": "High"}, {"pattern": "(?i)(comcast|xfinity)", "merchant_name": "Comcast Xfinity Business", "category": "Utilities & Telecommunications", "schedule_c_line": "Line 25: Utilities", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Dedicated high-speed commercial fiber internet connection with static IP address", "confidence": "High"}, {"pattern": "(?i)(spectrum|charter communications)", "merchant_name": "Spectrum Business Internet", "category": "Utilities & Telecommunications", "schedule_c_line": "Line 25: Utilities", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "High-speed broadband business internet connection for data uploads and video conferencing", "confidence": "High"}, {"pattern": "(?i)(google fiber)", "merchant_name": "Google Fiber", "category": "Utilities & Telecommunications", "schedule_c_line": "Line 25: Utilities", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Gigabit fiber optic internet connection for commercial software development", "confidence": "High"}, {"pattern": "(?i)(staples)", "merchant_name": "Staples Business Supplies", "category": "Office Supplies & Equipment", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Printer paper, toner cartridges, desk organizers, and physical office shipping supplies", "confidence": "High"}, {"pattern": "(?i)(office depot|officemax)", "merchant_name": "Office Depot / OfficeMax", "category": "Office Supplies & Equipment", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Office filing folders, dry-erase boards for sprint planning, and ergonomic accessories", "confidence": "High"}, {"pattern": "(?i)(amazon business|amzn\\.com/bill|amazon\\.com)", "merchant_name": "Amazon Business", "category": "Office Supplies & Equipment", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "USB-C docking station, HDMI cables, ergonomic mouse, and office reference textbooks", "confidence": "Medium"}, {"pattern": "(?i)(best buy)", "merchant_name": "Best Buy Electronics", "category": "Office Supplies & Equipment", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "External 4K monitor, backup solid state drive (SSD), and noise-canceling headset", "confidence": "High"}, {"pattern": "(?i)(b&h photo|bhphoto)", "merchant_name": "B&H Photo Video Pro Audio", "category": "Office Supplies & Equipment", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Studio microphone, key lighting, and 4K webcam for professional client presentations", "confidence": "High"}, {"pattern": "(?i)(apple store|apple\\.com/bill)", "merchant_name": "Apple Hardware / App Store", "category": "Office Supplies & Equipment", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "MacBook Pro M-Series development workstation and professional developer tools", "confidence": "High"}, {"pattern": "(?i)(usps|ups store|fedex|stamps\\.com)", "merchant_name": "Shipping & Postal Services", "category": "Office Expense & Postage", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Express mailing of signed physical client contracts, legal documents, and sample kits", "confidence": "High"}, {"pattern": "(?i)(udemy)", "merchant_name": "Udemy Courses", "category": "Education & Professional Training", "schedule_c_line": "Line 27a: Other expenses", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Technical training course in modern frontend architectures and cloud security", "confidence": "High"}, {"pattern": "(?i)(coursera)", "merchant_name": "Coursera Learning", "category": "Education & Professional Training", "schedule_c_line": "Line 27a: Other expenses", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Professional specialization certificate in Applied Data Science and Machine Learning", "confidence": "High"}, {"pattern": "(?i)(linkedin learning|lynda\\.com)", "merchant_name": "LinkedIn Learning", "category": "Education & Professional Training", "schedule_c_line": "Line 27a: Other expenses", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Professional skill continuing education and business management tutorials", "confidence": "High"}, {"pattern": "(?i)(o'reilly media|safari books)", "merchant_name": "O'Reilly Learning Platform", "category": "Education & Professional Training", "schedule_c_line": "Line 27a: Other expenses", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Online technical library subscription for software engineering and systems architecture", "confidence": "High"}, {"pattern": "(?i)(hiscox|next insurance|state farm|geico|hartford|business insurance)", "merchant_name": "Commercial General Liability Insurance", "category": "Business Insurance", "schedule_c_line": "Line 27a: Other expenses", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Errors & Omissions (E&O) and Commercial General Liability policy required by clients", "confidence": "High"}, {"pattern": "(?i)(envato|themeforest|graphicriver|elements\\.envato)", "merchant_name": "Envato Elements", "category": "Software & Digital Assets", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Commercial stock footage, audio tracks, icon libraries, and website code templates", "confidence": "High"}, {"pattern": "(?i)(shutterstock|getty images|istock)", "merchant_name": "Stock Photography Licensing", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Licensed high-resolution photography for client advertising banners and websites", "confidence": "High"}, {"pattern": "(?i)(typeform)", "merchant_name": "Typeform Surveys", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Interactive client intake questionnaires and customer feedback NPS surveys", "confidence": "High"}, {"pattern": "(?i)(docuign|docusign|hellosign|pandadoc)", "merchant_name": "Electronic Signature Platform (DocuSign)", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Legally binding digital execution of client statements of work and NDAs", "confidence": "High"}, {"pattern": "(?i)(sentry|sentry\\.io)", "merchant_name": "Sentry Error Monitoring", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Real-time production software exception tracking and crash diagnostics", "confidence": "High"}, {"pattern": "(?i)(datadog)", "merchant_name": "Datadog Cloud Monitoring", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Server telemetry metrics, APM performance tracing, and log aggregation", "confidence": "High"}, {"pattern": "(?i)(postman)", "merchant_name": "Postman API Platform", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "REST API automated testing suite, mock servers, and technical documentation", "confidence": "High"}, {"pattern": "(?i)(jetbrains)", "merchant_name": "JetBrains IDE Suite", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "PyCharm Professional and WebStorm software development environments", "confidence": "High"}, {"pattern": "(?i)(semrush|ahrefs|moz)", "merchant_name": "SEMrush / Ahrefs SEO Analytics", "category": "Advertising & Marketing", "schedule_c_line": "Line 8: Advertising", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Search engine keyword research, backlink audits, and competitive intelligence", "confidence": "High"}, {"pattern": "(?i)(hotjar)", "merchant_name": "Hotjar User Analytics", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "User behavioral heatmaps and visitor session recordings to improve conversion rates", "confidence": "High"}, {"pattern": "(?i)(mixpanel|amplitude)", "merchant_name": "Product Analytics (Mixpanel)", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "User funnel tracking, cohort retention, and feature engagement metrics", "confidence": "High"}, {"pattern": "(?i)(twilio)", "merchant_name": "Twilio Communications API", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Automated two-factor authentication SMS verification codes and client call routing", "confidence": "High"}, {"pattern": "(?i)(sendgrid)", "merchant_name": "Twilio SendGrid Transactional Email", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Transactional email delivery for password resets, order receipts, and alerts", "confidence": "High"}, {"pattern": "(?i)(resend|resend\\.com)", "merchant_name": "Resend Developer Email", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Modern developer email delivery infrastructure and React email templates", "confidence": "High"}, {"pattern": "(?i)(linear|linear\\.app)", "merchant_name": "Linear Issue Tracking", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "High-velocity issue tracking, sprint cycles, and software product roadmaps", "confidence": "High"}, {"pattern": "(?i)(intercom)", "merchant_name": "Intercom Customer Support", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Live customer support widget, automated help desk bots, and user onboarding tours", "confidence": "High"}, {"pattern": "(?i)(crisp\\.chat|crisp)", "merchant_name": "Crisp Chat Support", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Live website visitor messaging and customer support knowledge base", "confidence": "High"}, {"pattern": "(?i)(zendesk)", "merchant_name": "Zendesk Help Desk", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Enterprise support ticket tracking, customer SLA management, and documentation", "confidence": "High"}, {"pattern": "(?i)(nordvpn|expressvpn|surfshark|protonvpn)", "merchant_name": "Virtual Private Network (VPN)", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": true, "business_purpose": "Encrypted network tunneling to protect sensitive client credentials on public Wi-Fi", "confidence": "High"}, {"pattern": "(?i)(cleverbridge|fastspring)", "merchant_name": "Digital Software Distribution / License", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "deductible_percent": 1.0, "is_recurring": false, "business_purpose": "Specialized utility software license purchase for software engineering", "confidence": "High"}, {"pattern": "(?i)(direct deposit|payroll deposit|stripe payout|client payment|invoice payout|customer payment|wire deposit)", "merchant_name": "Client Revenue / Customer Payment", "category": "Business Inflow / Revenue", "schedule_c_line": "Gross Income: Sales & Services", "deductible_percent": 0.0, "is_recurring": false, "business_purpose": "Gross revenue earned from client consulting retainers, software builds, or product sales", "confidence": "High"}, {"pattern": "(?i)(owner draw|transfer to personal|transfer to savings|atm withdrawal|zelle to self|venmo to self|transfer to bank|general withdrawal|transfer to business checking)", "merchant_name": "Owner Draw / Non-Business Transfer", "category": "Equity & Internal Transfers", "schedule_c_line": "Non-Deductible: Personal / Transfer", "deductible_percent": 0.0, "is_recurring": false, "business_purpose": "Sole proprietor profit withdrawal or balance transfer between business accounts (Not deductible)", "confidence": "High"}, {"pattern": "(?i)(netflix|spotify|hulu|disney\\+|paramount\\+|max\\.com|playstation|xbox|nintendo|steam games)", "merchant_name": "Personal Entertainment / Non-Deductible", "category": "Personal Living Expense", "schedule_c_line": "Non-Deductible: Personal / Transfer", "deductible_percent": 0.0, "is_recurring": true, "business_purpose": "Personal entertainment service (Non-deductible personal expense segregated from business)", "confidence": "High"}, {"pattern": "(?i)(gym|equinox|planet fitness|la fitness|crossfit|peloton)", "merchant_name": "Personal Fitness / Non-Deductible", "category": "Personal Living Expense", "schedule_c_line": "Non-Deductible: Personal / Transfer", "deductible_percent": 0.0, "is_recurring": true, "business_purpose": "Personal fitness gym membership (Non-deductible personal living expense)", "confidence": "High"}, {"pattern": "(?i)(whole foods|trader joe's|kroger|safeway|publix|aldi|target grocery)", "merchant_name": "Personal Groceries / Non-Deductible", "category": "Personal Living Expense", "schedule_c_line": "Non-Deductible: Personal / Transfer", "deductible_percent": 0.0, "is_recurring": false, "business_purpose": "Personal home food and household grocery supplies (Non-deductible personal expense)", "confidence": "High"}];
+    const INITIAL_SUBSCRIPTIONS = [{"merchant_name": "Amazon Web Services (AWS)", "category": "Cloud Hosting & Infrastructure", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 194.13, "annual_projected": 2329.56, "occurrences_in_data": 3, "total_recorded_spend": 582.4, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Verizon Wireless", "category": "Utilities & Telecommunications", "schedule_c_line": "Line 25: Utilities", "frequency": "Monthly", "average_charge": 125.0, "annual_projected": 1500.0, "occurrences_in_data": 3, "total_recorded_spend": 375.0, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "PayPal Merchant Fees", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "frequency": "Monthly", "average_charge": 103.01, "annual_projected": 1236.12, "occurrences_in_data": 4, "total_recorded_spend": 412.04, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Comcast Xfinity Business", "category": "Utilities & Telecommunications", "schedule_c_line": "Line 25: Utilities", "frequency": "Monthly", "average_charge": 99.95, "annual_projected": 1199.4, "occurrences_in_data": 3, "total_recorded_spend": 299.85, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Adobe Creative Cloud", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 54.99, "annual_projected": 659.88, "occurrences_in_data": 3, "total_recorded_spend": 164.97, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Figma", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 45.0, "annual_projected": 540.0, "occurrences_in_data": 3, "total_recorded_spend": 135.0, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Google Workspace", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 36.0, "annual_projected": 432.0, "occurrences_in_data": 3, "total_recorded_spend": 108.0, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Envato Elements", "category": "Software & Digital Assets", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 33.0, "annual_projected": 396.0, "occurrences_in_data": 3, "total_recorded_spend": 99.0, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Zapier", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 29.99, "annual_projected": 359.88, "occurrences_in_data": 2, "total_recorded_spend": 59.98, "action_recommendation": "Audit Usage: Verify if actively used"}, {"merchant_name": "Typeform Surveys", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 29.0, "annual_projected": 348.0, "occurrences_in_data": 3, "total_recorded_spend": 87.0, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "GitHub", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 21.0, "annual_projected": 252.0, "occurrences_in_data": 3, "total_recorded_spend": 63.0, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Notion Labs", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 20.0, "annual_projected": 240.0, "occurrences_in_data": 3, "total_recorded_spend": 60.0, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Zoom Video Communications", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 15.99, "annual_projected": 191.88, "occurrences_in_data": 3, "total_recorded_spend": 47.97, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Bank Service Fee", "category": "Merchant & Payment Processing Fees", "schedule_c_line": "Line 10: Commissions and fees", "frequency": "Monthly", "average_charge": 15.0, "annual_projected": 180.0, "occurrences_in_data": 3, "total_recorded_spend": 45.0, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}, {"merchant_name": "Personal Entertainment / Non-Deductible", "category": "Personal Living Expense", "schedule_c_line": "Non-Deductible: Personal / Transfer", "frequency": "Monthly", "average_charge": 14.99, "annual_projected": 179.88, "occurrences_in_data": 2, "total_recorded_spend": 29.98, "action_recommendation": "[!] Personal Money Leak: Cancel or pay from personal card"}, {"merchant_name": "Canva Pro", "category": "Software & SaaS Subscriptions", "schedule_c_line": "Line 18: Office expense", "frequency": "Monthly", "average_charge": 12.99, "annual_projected": 155.88, "occurrences_in_data": 3, "total_recorded_spend": 38.97, "action_recommendation": "Active Core Service: Check for unused seats or annual discount"}];
+
+    const SCHEDULE_C_LINES = [
+      "Gross Income: Sales & Services",
+      "Line 8: Advertising",
+      "Line 9: Car and truck expenses",
+      "Line 10: Commissions and fees",
+      "Line 11: Contract labor",
+      "Line 17: Legal and professional services",
+      "Line 18: Office expense",
+      "Line 20b: Rent or lease (Vehicles, machinery, equipment)",
+      "Line 24a: Travel",
+      "Line 24b: Deductible meals (50%)",
+      "Line 25: Utilities",
+      "Line 27a: Other expenses",
+      "Uncategorized Expense",
+      "Non-Deductible: Personal / Transfer"
+    ];
+
+    let currentTransactions = JSON.parse(JSON.stringify(INITIAL_TRANSACTIONS));
+
+    // Initialize Page
+    document.addEventListener("DOMContentLoaded", () => {
+      populateCategoryFilters();
+      recalculateAll();
+      setupDragAndDrop();
+    });
+
+    function populateCategoryFilters() {
+      const select = document.getElementById("filter-category");
+      select.innerHTML = '<option value="ALL">All Categories & Lines</option>';
+      SCHEDULE_C_LINES.forEach(line => {
+        const opt = document.createElement("option");
+        opt.value = line;
+        opt.textContent = line;
+        select.appendChild(opt);
+      });
+    }
+
+    // Core Recalculation Engine
+    function recalculateAll() {
+      let grossIncome = 0;
+      let totalDeductibleExpenses = 0;
+      let nonDeductiblePersonal = 0;
+      const lineTotals = {};
+      SCHEDULE_C_LINES.forEach(l => lineTotals[l] = 0);
+
+      currentTransactions.forEach(t => {
+        const amt = t.amount;
+        const line = t.schedule_c_line;
+        const dedAmt = t.deductible_amount;
+
+        if (line === "Gross Income: Sales & Services") {
+          if (amt > 0) grossIncome += amt;
+          lineTotals[line] += amt;
+        } else if (line === "Non-Deductible: Personal / Transfer") {
+          nonDeductiblePersonal += Math.abs(amt);
+          lineTotals[line] += Math.abs(amt);
+        } else {
+          const exp = Math.abs(dedAmt);
+          totalDeductibleExpenses += exp;
+          lineTotals[line] += exp;
+        }
+      });
+
+      const netProfit = Math.max(0, grossIncome - totalDeductibleExpenses);
+      const seEarnings = netProfit * 0.9235;
+      const seTax = seEarnings * 0.153;
+      const seDeduction = seTax * 0.5;
+      const adjIncome = Math.max(0, netProfit - seDeduction);
+      const fedIncomeTax = adjIncome * 0.15;
+      const totalTax = seTax + fedIncomeTax;
+      const quarterlyPayment = totalTax / 4.0;
+
+      // Update KPI DOM
+      document.getElementById("kpi-gross").textContent = formatCurrency(grossIncome);
+      document.getElementById("kpi-expenses").textContent = "-" + formatCurrency(totalDeductibleExpenses);
+      document.getElementById("kpi-profit").textContent = formatCurrency(netProfit);
+      document.getElementById("kpi-se-tax").textContent = formatCurrency(seTax);
+      document.getElementById("kpi-quarterly").textContent = formatCurrency(quarterlyPayment) + "/qtr";
+
+      // Render Schedule C Table
+      renderScheduleCTable(lineTotals);
+
+      // Render Subscriptions
+      renderSubscriptionsTable();
+
+      // Render Charts
+      renderDonutChart(lineTotals);
+      renderBarChart();
+
+      // Render Ledger
+      filterTransactions();
+    }
+
+    function formatCurrency(val) {
+      return "$" + Number(val).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+    }
+
+    function renderScheduleCTable(lineTotals) {
+      const tbody = document.getElementById("schedule-c-tbody");
+      tbody.innerHTML = "";
+
+      // 1. Gross Income Row
+      const grossTr = document.createElement("tr");
+      grossTr.innerHTML = `
+        <td style="font-weight: 700; color: #FFFFFF;">Gross Income: Sales & Services</td>
+        <td>Schedule C Line 1 (Client Payments & Retainers)</td>
+        <td style="text-align: right;" class="amt-positive">${formatCurrency(lineTotals["Gross Income: Sales & Services"])}</td>
+        <td style="text-align: center;">N/A</td>
+        <td style="text-align: right; font-weight: 700;" class="amt-positive">${formatCurrency(lineTotals["Gross Income: Sales & Services"])}</td>
+        <td style="color: var(--text-muted);">Total 1099-NEC & client gross deposits</td>
+      `;
+      tbody.appendChild(grossTr);
+
+      // 2. Expense Lines
+      SCHEDULE_C_LINES.forEach(line => {
+        if (line === "Gross Income: Sales & Services" || line === "Non-Deductible: Personal / Transfer") return;
+        const total = lineTotals[line] || 0;
+        const pct = line === "Line 24b: Deductible meals (50%)" ? "50%" : "100%";
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td style="font-weight: 600;">${line}</td>
+          <td>${getLineDescription(line)}</td>
+          <td style="text-align: right;">${formatCurrency(total)}</td>
+          <td style="text-align: center;">${pct}</td>
+          <td style="text-align: right; font-weight: 700;">${formatCurrency(total)}</td>
+          <td style="color: var(--text-muted); font-size: 0.75rem;">Eligible business tax write-off</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      // 3. Non-Deductible Transfers
+      const nonDedTr = document.createElement("tr");
+      nonDedTr.innerHTML = `
+        <td style="color: var(--rose-danger); font-weight: 600;">Non-Deductible: Personal / Transfer</td>
+        <td>Owner Draws & Personal Living Expenses</td>
+        <td style="text-align: right; color: var(--rose-danger);">${formatCurrency(lineTotals["Non-Deductible: Personal / Transfer"])}</td>
+        <td style="text-align: center;">0%</td>
+        <td style="text-align: right; color: var(--text-muted);">$0.00</td>
+        <td style="color: var(--rose-danger); font-size: 0.75rem;">Segregated personal living expenses (Not deductible)</td>
+      `;
+      tbody.appendChild(nonDedTr);
+    }
+
+    function getLineDescription(line) {
+      const map = {
+        "Line 8: Advertising": "Digital Ads, SEO, Domains & Promotion",
+        "Line 9: Car and truck expenses": "Business Rideshares & Mileage",
+        "Line 10: Commissions and fees": "Payment Gateway & Banking Fees",
+        "Line 11: Contract labor": "Subcontractors & Independent Contractors",
+        "Line 17: Legal and professional services": "CPA Tax Prep & Legal Review",
+        "Line 18: Office expense": "Software, SaaS, Cloud & Office Supplies",
+        "Line 20b: Rent or lease (Vehicles, machinery, equipment)": "Dedicated Co-Working Space & Desk",
+        "Line 24a: Travel": "Business Airfare & Hotel Lodging",
+        "Line 24b: Deductible meals (50%)": "Client Business Dining (50% Deduction)",
+        "Line 25: Utilities": "Cell Phone & High-Speed Internet",
+        "Line 27a: Other expenses": "Professional Education & Insurance",
+        "Uncategorized Expense": "Requires Receipt Verification"
+      };
+      return map[line] || "Business Operating Expense";
+    }
+
+    function renderSubscriptionsTable() {
+      const tbody = document.getElementById("subscriptions-tbody");
+      tbody.innerHTML = "";
+      let annualTotal = 0;
+
+      INITIAL_SUBSCRIPTIONS.forEach(s => {
+        annualTotal += s.annual_projected;
+        const tr = document.createElement("tr");
+        const isLeak = s.schedule_c_line === "Non-Deductible: Personal / Transfer";
+        tr.innerHTML = `
+          <td style="font-weight: 700; color: #FFFFFF;">${s.merchant_name}</td>
+          <td>${s.category || 'Software'}</td>
+          <td>${s.schedule_c_line}</td>
+          <td><span class="${isLeak ? 'tag-personal' : 'tag-recurring'}">${s.frequency}</span></td>
+          <td style="text-align: right; font-weight: 600;">${formatCurrency(s.average_charge)}</td>
+          <td style="text-align: right; font-weight: 700; color: var(--sky-blue);">${formatCurrency(s.annual_projected)}</td>
+          <td style="font-size: 0.78rem; color: ${isLeak ? 'var(--rose-danger)' : 'var(--text-secondary)'}; font-weight: 500;">${s.action_recommendation}</td>
+        `;
+        tbody.appendChild(tr);
+      });
+
+      document.getElementById("kpi-subscriptions").textContent = formatCurrency(annualTotal) + "/yr";
+    }
+
+    // Pure SVG Donut Chart
+    function renderDonutChart(lineTotals) {
+      const container = document.getElementById("donut-chart-container");
+      container.innerHTML = "";
+
+      const entries = [];
+      let totalExpense = 0;
+      SCHEDULE_C_LINES.forEach(l => {
+        if (l === "Gross Income: Sales & Services" || l === "Non-Deductible: Personal / Transfer") return;
+        const val = lineTotals[l] || 0;
+        if (val > 0) {
+          entries.push({ label: l.replace(/Line \d+[a-z]?: /, ""), val: val });
+          totalExpense += val;
+        }
+      });
+
+      if (totalExpense === 0) {
+        container.innerHTML = '<div style="color: var(--text-muted);">No expenses recorded</div>';
+        return;
+      }
+
+      entries.sort((a, b) => b.val - a.val);
+
+      const colors = ["#2563EB", "#38BDF8", "#10B981", "#F59E0B", "#8B5CF6", "#EC4899", "#14B8A6", "#64748B"];
+      let cumulativePercent = 0;
+      const size = 260;
+      const center = size / 2;
+      const radius = 95;
+      const innerRadius = 60;
+
+      let svgHtml = `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">`;
+
+      entries.slice(0, 6).forEach((entry, i) => {
+        const percent = entry.val / totalExpense;
+        const startAngle = cumulativePercent * 2 * Math.PI;
+        cumulativePercent += percent;
+        const endAngle = cumulativePercent * 2 * Math.PI;
+
+        const x1 = center + radius * Math.cos(startAngle);
+        const y1 = center + radius * Math.sin(startAngle);
+        const x2 = center + radius * Math.cos(endAngle);
+        const y2 = center + radius * Math.sin(endAngle);
+
+        const x3 = center + innerRadius * Math.cos(endAngle);
+        const y3 = center + innerRadius * Math.sin(endAngle);
+        const x4 = center + innerRadius * Math.cos(startAngle);
+        const y4 = center + innerRadius * Math.sin(startAngle);
+
+        const largeArc = percent > 0.5 ? 1 : 0;
+        const color = colors[i % colors.length];
+
+        const pathData = `M ${x1} ${y1} A ${radius} ${radius} 0 ${largeArc} 1 ${x2} ${y2} L ${x3} ${y3} A ${innerRadius} ${innerRadius} 0 ${largeArc} 0 ${x4} ${y4} Z`;
+        svgHtml += `<path d="${pathData}" fill="${color}" stroke="#1E293B" stroke-width="2"><title>${entry.label}: ${formatCurrency(entry.val)} (${Math.round(percent*100)}%)</title></path>`;
+      });
+
+      // Center text
+      svgHtml += `
+        <text x="${center}" y="${center - 6}" text-anchor="middle" fill="#94A3B8" font-size="11" font-weight="600">TOTAL</text>
+        <text x="${center}" y="${center + 14}" text-anchor="middle" fill="#FFFFFF" font-size="14" font-weight="800">${formatCurrency(totalExpense)}</text>
+      </svg>`;
+
+      // Add Legend
+      let legendHtml = '<div style="display: flex; flex-direction: column; gap: 6px; margin-left: 20px; font-size: 0.78rem;">';
+      entries.slice(0, 6).forEach((entry, i) => {
+        const color = colors[i % colors.length];
+        const pct = Math.round((entry.val / totalExpense) * 100);
+        legendHtml += `
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <div style="width: 10px; height: 10px; background-color: ${color}; border-radius: 2px;"></div>
+            <span style="color: #F8FAFC;">${entry.label} (${pct}%)</span>
+          </div>`;
+      });
+      legendHtml += '</div>';
+
+      container.innerHTML = `<div style="display: flex; align-items: center; justify-content: center; width: 100%;">${svgHtml}${legendHtml}</div>`;
+    }
+
+    // Pure SVG Bar Chart: Monthly Comparisons
+    function renderBarChart() {
+      const container = document.getElementById("bar-chart-container");
+      container.innerHTML = "";
+
+      const months = ["October 2026", "November 2026", "December 2026"];
+      const data = [
+        { revenue: 10550, expense: 2185.64 },
+        { revenue: 7700, expense: 2645.28 },
+        { revenue: 10000, expense: 2437.48 }
+      ];
+
+      const maxVal = 12000;
+      const width = 440;
+      const height = 220;
+      const barWidth = 32;
+
+      let svg = `<svg width="100%" height="100%" viewBox="0 0 ${width} ${height}">`;
+
+      // Gridlines
+      for (let g = 0; g <= 4; g++) {
+        const y = 30 + g * 38;
+        const val = Math.round(maxVal - (g * maxVal / 4));
+        svg += `
+          <line x1="50" y1="${y}" x2="${width - 20}" y2="${y}" stroke="#334155" stroke-dasharray="3,3" />
+          <text x="42" y="${y + 4}" fill="#64748B" font-size="10" text-anchor="end">$${val/1000}k</text>
+        `;
+      }
+
+      // Bars
+      months.forEach((m, i) => {
+        const xCenter = 110 + i * 120;
+        const d = data[i];
+
+        const revHeight = (d.revenue / maxVal) * 152;
+        const expHeight = (d.expense / maxVal) * 152;
+
+        const revY = 182 - revHeight;
+        const expY = 182 - expHeight;
+
+        // Revenue Bar
+        svg += `<rect x="${xCenter - barWidth - 2}" y="${revY}" width="${barWidth}" height="${revHeight}" fill="#10B981" rx="4"><title>${m} Revenue: ${formatCurrency(d.revenue)}</title></rect>`;
+        // Expense Bar
+        svg += `<rect x="${xCenter + 2}" y="${expY}" width="${barWidth}" height="${expHeight}" fill="#2563EB" rx="4"><title>${m} Expense: ${formatCurrency(d.expense)}</title></rect>`;
+
+        // Month Label
+        svg += `<text x="${xCenter}" y="206" fill="#94A3B8" font-size="11" text-anchor="middle" font-weight="600">${m.split(" ")[0]}</text>`;
+      });
+
+      // Legend
+      svg += `
+        <g transform="translate(140, 10)">
+          <rect x="0" y="0" width="10" height="10" fill="#10B981" rx="2" />
+          <text x="16" y="9" fill="#F8FAFC" font-size="11">Gross Revenue</text>
+          <rect x="110" y="0" width="10" height="10" fill="#2563EB" rx="2" />
+          <text x="126" y="9" fill="#F8FAFC" font-size="11">Deductible Expenses</text>
+        </g>
+      `;
+
+      svg += '</svg>';
+      container.innerHTML = svg;
+    }
+
+    // Ledger Filtering & Re-Categorization
+    function filterTransactions() {
+      const search = document.getElementById("search-input").value.toLowerCase();
+      const catFilter = document.getElementById("filter-category").value;
+      const typeFilter = document.getElementById("filter-type").value;
+      const tbody = document.getElementById("transactions-tbody");
+      tbody.innerHTML = "";
+
+      let matchCount = 0;
+
+      currentTransactions.forEach(t => {
+        const matchesSearch = !search ||
+          t.merchant.toLowerCase().includes(search) ||
+          t.description.toLowerCase().includes(search) ||
+          t.amount.toString().includes(search);
+
+        const matchesCat = (catFilter === "ALL") || (t.schedule_c_line === catFilter);
+
+        let matchesType = true;
+        if (typeFilter === "INCOME") matchesType = t.amount > 0;
+        else if (typeFilter === "EXPENSE") matchesType = (t.amount < 0 && t.schedule_c_line !== "Non-Deductible: Personal / Transfer");
+        else if (typeFilter === "RECURRING") matchesType = t.is_recurring;
+        else if (typeFilter === "PERSONAL") matchesType = t.schedule_c_line === "Non-Deductible: Personal / Transfer";
+
+        if (matchesSearch && matchesCat && matchesType) {
+          matchCount++;
+          const tr = document.createElement("tr");
+          const isIncome = t.amount > 0;
+          const isPersonal = t.schedule_c_line === "Non-Deductible: Personal / Transfer";
+
+          let lineSelectHtml = `<select class="category-select" onchange="updateTransactionCategory(${t.id}, this.value)">`;
+          SCHEDULE_C_LINES.forEach(l => {
+            const sel = (l === t.schedule_c_line) ? "selected" : "";
+            lineSelectHtml += `<option value="${l}" ${sel}>${l}</option>`;
+          });
+          lineSelectHtml += `</select>`;
+
+          tr.innerHTML = `
+            <td style="white-space: nowrap; font-size: 0.8rem; color: var(--text-secondary);">${t.date}</td>
+            <td style="font-size: 0.8rem; color: var(--text-muted);">${t.source}</td>
+            <td style="font-weight: 700; color: #FFFFFF;">${t.merchant}</td>
+            <td style="font-size: 0.78rem; color: var(--text-secondary); max-width: 220px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;">${t.description}</td>
+            <td style="text-align: right;" class="${isIncome ? 'amt-positive' : 'amt-negative'}">${formatCurrency(t.amount)}</td>
+            <td>${lineSelectHtml}</td>
+            <td style="text-align: center; font-size: 0.8rem;">${Math.round(t.deductible_percent * 100)}%</td>
+            <td style="text-align: right; font-weight: 600;">${formatCurrency(t.deductible_amount)}</td>
+            <td style="text-align: center;">${t.is_recurring ? '<span class="tag-recurring">YES</span>' : '<span style="color: var(--text-muted); font-size: 0.75rem;">NO</span>'}</td>
+          `;
+          tbody.appendChild(tr);
+        }
+      });
+
+      document.getElementById("tx-count-display").textContent = `Showing ${matchCount} of ${currentTransactions.length} transactions`;
+    }
+
+    // Dynamic Category Update Handler
+    function updateTransactionCategory(txId, newCategory) {
+      const tx = currentTransactions.find(t => t.id === txId);
+      if (!tx) return;
+
+      tx.schedule_c_line = newCategory;
+      if (newCategory === "Gross Income: Sales & Services") {
+        tx.deductible_percent = 0.0;
+        tx.deductible_amount = 0.0;
+      } else if (newCategory === "Line 24b: Deductible meals (50%)") {
+        tx.deductible_percent = 0.5;
+        tx.deductible_amount = Math.round(Math.abs(tx.amount) * 0.5 * 100) / 100;
+      } else if (newCategory === "Non-Deductible: Personal / Transfer") {
+        tx.deductible_percent = 0.0;
+        tx.deductible_amount = 0.0;
+      } else {
+        tx.deductible_percent = 1.0;
+        tx.deductible_amount = Math.round(Math.abs(tx.amount) * 100) / 100;
+      }
+
+      recalculateAll();
+    }
+
+    // Drag and Drop CSV Importer
+    function setupDragAndDrop() {
+      const dropZone = document.getElementById("drop-zone");
+      const fileInput = document.getElementById("file-input");
+
+      dropZone.addEventListener("dragover", e => {
+        e.preventDefault();
+        dropZone.classList.add("dragover");
+      });
+
+      dropZone.addEventListener("dragleave", () => {
+        dropZone.classList.remove("dragover");
+      });
+
+      dropZone.addEventListener("drop", e => {
+        e.preventDefault();
+        dropZone.classList.remove("dragover");
+        if (e.dataTransfer.files && e.dataTransfer.files.length > 0) {
+          handleFile(e.dataTransfer.files[0]);
+        }
+      });
+
+      fileInput.addEventListener("change", e => {
+        if (e.target.files && e.target.files.length > 0) {
+          handleFile(e.target.files[0]);
+        }
+      });
+    }
+
+    function handleFile(file) {
+      if (!file.name.endsWith(".csv")) {
+        alert("Please drop a valid .csv bank statement file.");
+        return;
+      }
+
+      const reader = new FileReader();
+      reader.onload = e => {
+        const text = e.target.result;
+        parseCustomCSV(text, file.name);
+      };
+      reader.readAsText(file);
+    }
+
+    function parseCustomCSV(csvText, fileName) {
+      const lines = csvText.split(/\r?\n/).filter(l => l.trim().length > 0);
+      if (lines.length < 2) return;
+
+      const header = lines[0].toLowerCase().split(",").map(c => c.trim().replace(/"/g, ""));
+      const newTransactions = [];
+
+      for (let i = 1; i < lines.length; i++) {
+        const cols = lines[i].split(",").map(c => c.trim().replace(/"/g, ""));
+        if (cols.length < 2) continue;
+
+        let date = cols[0] || "2026-01-01";
+        let desc = cols[1] || "Bank Transaction";
+        let amt = 0;
+
+        if (header.includes("amount")) {
+          const amtIdx = header.indexOf("amount");
+          amt = parseFloat(cols[amtIdx].replace(/[^0-9.-]/g, "")) || 0;
+        } else if (cols.length >= 3) {
+          amt = parseFloat(cols[2].replace(/[^0-9.-]/g, "")) || 0;
+        }
+
+        // Match against rulebook
+        let matchedRule = null;
+        for (let r of RULES_CONFIG) {
+          try {
+            const rx = new RegExp(r.pattern, "i");
+            if (rx.test(desc)) {
+              matchedRule = r;
+              break;
+            }
+          } catch(err) {}
+        }
+
+        let scheduleC = "Uncategorized Expense";
+        let merchant = desc;
+        let dedPct = 1.0;
+        let isRec = false;
+
+        if (matchedRule) {
+          scheduleC = matchedRule.schedule_c_line;
+          merchant = matchedRule.merchant_name;
+          dedPct = matchedRule.deductible_percent;
+          isRec = matchedRule.is_recurring;
+        } else if (amt > 0) {
+          scheduleC = "Gross Income: Sales & Services";
+          dedPct = 0.0;
+        }
+
+        let dedAmt = 0;
+        if (scheduleC === "Gross Income: Sales & Services" || scheduleC === "Non-Deductible: Personal / Transfer") {
+          dedAmt = 0;
+        } else {
+          dedAmt = Math.round(Math.abs(amt) * dedPct * 100) / 100;
+        }
+
+        newTransactions.push({
+          id: currentTransactions.length + newTransactions.length + 1,
+          date: date,
+          source: fileName,
+          merchant: merchant,
+          description: desc,
+          amount: amt,
+          schedule_c_line: scheduleC,
+          category: matchedRule ? matchedRule.category : "General",
+          deductible_percent: dedPct,
+          deductible_amount: dedAmt,
+          is_recurring: isRec,
+          business_purpose: matchedRule ? matchedRule.business_purpose : "Imported transaction"
+        });
+      }
+
+      currentTransactions = newTransactions;
+      recalculateAll();
+      alert(`Successfully imported ${newTransactions.length} transactions from ${fileName}!`);
+    }
+
+    function resetToSampleData() {
+      currentTransactions = JSON.parse(JSON.stringify(INITIAL_TRANSACTIONS));
+      recalculateAll();
+      alert("Reset to initial sample bank data.");
+    }
+
+    // Export Handlers
+    function exportCategorizedCSV() {
+      let csvContent = "Date,Account Source,Merchant Name,Original Description,Amount,Schedule C Line,Category,Deductible %,Deductible Amount,Recurring?,Business Purpose\n";
+      currentTransactions.forEach(t => {
+        csvContent += `"${t.date}","${t.source}","${t.merchant}","${t.description.replace(/"/g, '""')}",${t.amount.toFixed(2)},"${t.schedule_c_line}","${t.category}","${Math.round(t.deductible_percent*100)}%",${t.deductible_amount.toFixed(2)},"${t.is_recurring ? 'YES' : 'NO'}","${t.business_purpose.replace(/"/g, '""')}"\n`;
+      });
+      downloadBlob(csvContent, "categorized_transactions.csv", "text/csv;charset=utf-8;");
+    }
+
+    function exportScheduleCCSV() {
+      const lineTotals = {};
+      SCHEDULE_C_LINES.forEach(l => lineTotals[l] = 0);
+      let gross = 0;
+      let exp = 0;
+
+      currentTransactions.forEach(t => {
+        if (t.schedule_c_line === "Gross Income: Sales & Services") {
+          if (t.amount > 0) gross += t.amount;
+        } else if (t.schedule_c_line !== "Non-Deductible: Personal / Transfer") {
+          exp += Math.abs(t.deductible_amount);
+        }
+        lineTotals[t.schedule_c_line] += (t.schedule_c_line === "Gross Income: Sales & Services") ? t.amount : Math.abs(t.deductible_amount);
+      });
+
+      let csvContent = "Schedule C Line / Tax Category,Amount ($USD),Form Reference\n";
+      csvContent += `"Gross Income: Sales & Services",${gross.toFixed(2)},"Schedule C Line 1"\n\n`;
+      csvContent += `"DEDUCTIBLE BUSINESS EXPENSES",,\n`;
+      SCHEDULE_C_LINES.forEach(l => {
+        if (l === "Gross Income: Sales & Services" || l === "Non-Deductible: Personal / Transfer") return;
+        csvContent += `"${l}",${lineTotals[l].toFixed(2)},"Schedule C"\n`;
+      });
+      csvContent += `\n"TOTAL DEDUCTIBLE EXPENSES",${exp.toFixed(2)},"Schedule C Line 28"\n`;
+      csvContent += `"NET BUSINESS PROFIT / LOSS",${Math.max(0, gross - exp).toFixed(2)},"Schedule C Line 31"\n`;
+
+      downloadBlob(csvContent, "tax_summary_schedule_c.csv", "text/csv;charset=utf-8;");
+    }
+
+    function downloadBlob(content, filename, contentType) {
+      const blob = new Blob([content], { type: contentType });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.setAttribute("href", url);
+      link.setAttribute("download", filename);
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+    }
+  </script>
+</body>
+</html>
